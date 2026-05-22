@@ -216,7 +216,7 @@ async def analyze(req: ReviewRequest):
 @app.get("/api/health")
 async def health():
     if GROQ_API_KEY:
-        return {"status": "ok", "engine": "groq", "model": "llama-3.1-8b-instant"}
+        return {"status": "ok", "engine": "groq", "model": "llama-3.3-70b-versatile",}
     elif ANTHROPIC_API_KEY:
         return {"status": "ok", "engine": "anthropic", "model": "claude-sonnet"}
     else:
