@@ -15,21 +15,26 @@
     --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --purple: #a78bfa;
     --font: 'IBM Plex Sans', sans-serif; --mono: 'IBM Plex Mono', monospace;
   }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; overflow: hidden; }
-  .shell { display: flex; flex-direction: column; height: 100vh; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+  
+  /* Layout */
   .topbar {
     display: flex; align-items: center; gap: 12px;
     padding: 14px 24px; border-bottom: 1px solid var(--border);
-    background: var(--surface); flex-shrink: 0;
+    background: var(--surface); position: sticky; top: 0; z-index: 100;
   }
   .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
   .topbar-title { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
   .topbar-sub { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-left: auto; }
-  .main { display: grid; grid-template-columns: 340px 1fr; flex: 1; overflow: hidden; }
-
-  /* Sidebar */
-  .sidebar { border-right: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; overflow-y: auto; }
-  .panel-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 16px 20px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  
+  .main { display: flex; min-height: calc(100vh - 49px); }
+  
+  .sidebar {
+    width: 340px; min-width: 340px; border-right: 1px solid var(--border);
+    background: var(--surface); overflow-y: auto; position: sticky; top: 49px;
+    height: calc(100vh - 49px);
+  }
+  .panel-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 16px 20px 8px; border-bottom: 1px solid var(--border); }
   .form-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
   .field label { display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
   .field input, .field select, .field textarea {
@@ -52,10 +57,9 @@
   }
   .btn-analyze:hover { background: var(--accent); }
   .btn-analyze:disabled { opacity: 0.4; cursor: not-allowed; }
-  .spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  .spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* History */
   .history-section { border-top: 1px solid var(--border); padding: 12px 20px 16px; }
   .history-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
   .hist-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
@@ -64,9 +68,11 @@
   .hist-name { font-size: 12px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hist-time { font-size: 10px; color: var(--muted); font-family: var(--mono); }
 
-  /* Content pane */
-  .content { overflow-y: auto; padding: 28px 32px; background: var(--bg); display: flex; flex-direction: column; gap: 22px; }
-  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--muted); text-align: center; padding: 60px 40px; }
+  /* Content - key fix: flex: 1 and overflow auto */
+  .content { flex: 1; padding: 28px 32px; background: var(--bg); overflow-y: auto; }
+  .content-inner { display: flex; flex-direction: column; gap: 22px; max-width: 900px; }
+  
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--muted); text-align: center; padding: 120px 40px; }
   .empty-icon { width: 56px; height: 56px; border: 1px solid var(--border2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
   .empty-state h2 { font-size: 16px; font-weight: 500; color: var(--text); }
   .empty-state p { font-size: 13px; line-height: 1.65; max-width: 340px; }
@@ -74,22 +80,24 @@
   .ex-chip { font-size: 11px; font-family: var(--mono); padding: 4px 10px; border: 1px solid var(--border2); border-radius: 20px; color: var(--muted); cursor: pointer; transition: all 0.15s; }
   .ex-chip:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* Result */
+  /* Result sections */
   .result-header { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
   .app-identity { flex: 1; }
   .app-name { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
   .app-meta { font-size: 12px; color: var(--muted); font-family: var(--mono); display: flex; gap: 16px; flex-wrap: wrap; }
-  .verdict-badge { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 10px; border: 1px solid; }
+  
+  .verdict-badge { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 10px; border: 1px solid; max-width: 280px; }
   .verdict-badge.approve { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); }
   .verdict-badge.deny { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); }
   .verdict-badge.conditional { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3); }
-  .verdict-icon { font-size: 26px; }
+  .verdict-icon { font-size: 26px; flex-shrink: 0; }
   .verdict-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
   .verdict-text { font-size: 17px; font-weight: 600; }
   .verdict-badge.approve .verdict-text { color: var(--green); }
   .verdict-badge.deny .verdict-text { color: var(--red); }
   .verdict-badge.conditional .verdict-text { color: var(--amber); }
-  .verdict-reason { font-size: 11px; color: var(--muted); margin-top: 3px; max-width: 200px; line-height: 1.4; }
+  .verdict-reason { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+  
   .score-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
   .score-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
@@ -98,38 +106,45 @@
   .score-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
   .c-critical { color: var(--red); } .c-high { color: var(--amber); }
   .c-medium { color: #fb923c; } .c-low { color: var(--green); } .c-info { color: var(--accent); }
-  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  
+  /* Section cards - explicit display block */
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; display: block; }
   .section-head { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid var(--border); }
-  .section-ico { width: 27px; height: 27px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .section-ico { width: 27px; height: 27px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
   .ico-blue { background: rgba(56,189,248,0.12); }
   .ico-red { background: rgba(239,68,68,0.1); }
   .ico-green { background: rgba(34,197,94,0.1); }
   .ico-amber { background: rgba(245,158,11,0.1); }
   .ico-purple { background: rgba(167,139,250,0.1); }
   .section-title { font-size: 13px; font-weight: 500; }
-  .section-body { padding: 18px; }
-  .prose { font-size: 13px; line-height: 1.75; color: #94a3b8; }
+  .section-body { padding: 18px; display: block; }
+  
+  .prose { font-size: 13px; line-height: 1.75; color: #94a3b8; display: block; word-wrap: break-word; }
+  
   .vuln-list { display: flex; flex-direction: column; gap: 10px; }
   .vuln-item { display: flex; gap: 14px; align-items: flex-start; padding: 12px 14px; background: var(--surface2); border-radius: 8px; border-left: 3px solid; }
   .vuln-item.critical { border-color: var(--red); } .vuln-item.high { border-color: var(--amber); }
   .vuln-item.medium { border-color: #fb923c; } .vuln-item.low { border-color: var(--green); }
   .vuln-cve { font-family: var(--mono); font-size: 11px; color: var(--accent); white-space: nowrap; padding-top: 2px; min-width: 110px; }
-  .vuln-detail { flex: 1; }
+  .vuln-detail { flex: 1; min-width: 0; }
   .vuln-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
-  .vuln-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .vuln-sev { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+  .vuln-desc { font-size: 12px; color: var(--muted); line-height: 1.5; word-wrap: break-word; }
+  .vuln-sev { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0; }
   .vuln-sev.critical { background: rgba(239,68,68,0.15); color: var(--red); }
   .vuln-sev.high { background: rgba(245,158,11,0.15); color: var(--amber); }
   .vuln-sev.medium { background: rgba(251,146,60,0.15); color: #fb923c; }
   .vuln-sev.low { background: rgba(34,197,94,0.15); color: var(--green); }
+  
   .cond-list { display: flex; flex-direction: column; gap: 8px; }
   .cond-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--surface2); border-radius: 7px; font-size: 13px; color: #94a3b8; line-height: 1.5; }
   .cond-num { font-family: var(--mono); font-size: 11px; color: var(--accent); min-width: 18px; padding-top: 1px; flex-shrink: 0; }
+  
   .risk-bars { display: flex; flex-direction: column; gap: 12px; }
   .rbar-row { display: flex; flex-direction: column; gap: 5px; }
   .rbar-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
-  .rbar-track { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .rbar-track { height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
   .rbar-fill { height: 100%; border-radius: 99px; transition: width 0.9s cubic-bezier(0.4,0,0.2,1); }
+  
   .loading-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 80px 0; color: var(--muted); }
   .loading-ring { width: 40px; height: 40px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   .loading-steps { display: flex; flex-direction: column; gap: 8px; }
@@ -137,93 +152,89 @@
   .lstep-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
   .lstep-dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
   .lstep-dot.done { background: var(--green); }
+  
   .error-box { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 18px; font-size: 13px; color: #fca5a5; line-height: 1.7; }
   .error-box code { font-family: var(--mono); font-size: 12px; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; }
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
 </style>
 </head>
 <body>
-<div class="shell">
-  <div class="topbar">
-    <div class="logo-dot"></div>
-    <span class="topbar-title">AI Security Review Board</span>
-    <span class="topbar-sub">Threat &amp; VM · Application Risk Intelligence</span>
-  </div>
-  <div class="main">
-    <div class="sidebar">
-      <div class="panel-label">Application Request</div>
-      <div class="form-body">
-        <div class="field">
-          <label>Application / Software Name</label>
-          <input type="text" id="appName" placeholder="e.g. WireShark, Notion, TeamViewer"/>
-        </div>
-        <div class="field">
-          <label>Version (optional)</label>
-          <input type="text" id="appVersion" placeholder="e.g. 4.2.1 or latest"/>
-        </div>
-        <div class="field">
-          <label>Vendor / Publisher</label>
-          <input type="text" id="appVendor" placeholder="e.g. Wireshark Foundation"/>
-        </div>
-        <div class="field">
-          <label>Deployment Environment</label>
-          <select id="appEnv">
-            <option value="corporate_endpoint">Corporate Endpoint</option>
-            <option value="server">Internal Server</option>
-            <option value="cloud">Cloud / SaaS</option>
-            <option value="developer_machine">Developer Machine</option>
-            <option value="network_device">Network Device</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Business Justification</label>
-          <textarea id="appJustification" placeholder="Why is this application needed?"></textarea>
-        </div>
-        <div class="field">
-          <label>Data Classification Exposure</label>
-          <div class="tag-row" id="dataTags">
-            <span class="tag" data-val="PII">PII</span>
-            <span class="tag" data-val="PCI">PCI</span>
-            <span class="tag" data-val="Confidential">Confidential</span>
-            <span class="tag" data-val="Internal">Internal</span>
-            <span class="tag" data-val="Public">Public</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Required Permissions</label>
-          <div class="tag-row" id="permTags">
-            <span class="tag" data-val="Network">Network</span>
-            <span class="tag" data-val="Admin">Admin</span>
-            <span class="tag" data-val="FileSystem">File system</span>
-            <span class="tag" data-val="Browser">Browser</span>
-            <span class="tag" data-val="Camera/Mic">Camera/Mic</span>
-            <span class="tag" data-val="Internet">Internet</span>
-          </div>
-        </div>
-        <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">
-          ⟡ Analyze Application Risk
-        </button>
+<div class="topbar">
+  <div class="logo-dot"></div>
+  <span class="topbar-title">AI Security Review Board</span>
+  <span class="topbar-sub">Threat &amp; VM · Application Risk Intelligence</span>
+</div>
+<div class="main">
+  <div class="sidebar">
+    <div class="panel-label">Application Request</div>
+    <div class="form-body">
+      <div class="field">
+        <label>Application / Software Name</label>
+        <input type="text" id="appName" placeholder="e.g. WireShark, Notion, TeamViewer"/>
       </div>
-      <div class="history-section" id="histSection" style="display:none">
-        <div class="history-label">Previous Reviews</div>
-        <div id="histList"></div>
+      <div class="field">
+        <label>Version (optional)</label>
+        <input type="text" id="appVersion" placeholder="e.g. 4.2.1 or latest"/>
       </div>
+      <div class="field">
+        <label>Vendor / Publisher</label>
+        <input type="text" id="appVendor" placeholder="e.g. Wireshark Foundation"/>
+      </div>
+      <div class="field">
+        <label>Deployment Environment</label>
+        <select id="appEnv">
+          <option value="corporate_endpoint">Corporate Endpoint</option>
+          <option value="server">Internal Server</option>
+          <option value="cloud">Cloud / SaaS</option>
+          <option value="developer_machine">Developer Machine</option>
+          <option value="network_device">Network Device</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Business Justification</label>
+        <textarea id="appJustification" placeholder="Why is this application needed?"></textarea>
+      </div>
+      <div class="field">
+        <label>Data Classification Exposure</label>
+        <div class="tag-row" id="dataTags">
+          <span class="tag" data-val="PII">PII</span>
+          <span class="tag" data-val="PCI">PCI</span>
+          <span class="tag" data-val="Confidential">Confidential</span>
+          <span class="tag" data-val="Internal">Internal</span>
+          <span class="tag" data-val="Public">Public</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Required Permissions</label>
+        <div class="tag-row" id="permTags">
+          <span class="tag" data-val="Network">Network</span>
+          <span class="tag" data-val="Admin">Admin</span>
+          <span class="tag" data-val="FileSystem">File system</span>
+          <span class="tag" data-val="Browser">Browser</span>
+          <span class="tag" data-val="Camera/Mic">Camera/Mic</span>
+          <span class="tag" data-val="Internet">Internet</span>
+        </div>
+      </div>
+      <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">
+        ⟡ Analyze Application Risk
+      </button>
     </div>
+    <div class="history-section" id="histSection" style="display:none">
+      <div class="history-label">Previous Reviews</div>
+      <div id="histList"></div>
+    </div>
+  </div>
 
-    <div class="content" id="contentPane">
-      <div class="empty-state">
-        <div class="empty-icon">⟡</div>
-        <h2>No application under review</h2>
-        <p>Fill in the request details and click Analyze to receive an AI-powered risk assessment with CVE data, threat intelligence, and a formal security recommendation.</p>
-        <div class="empty-examples">
-          <span class="ex-chip" onclick="quickFill('WireShark','Wireshark Foundation')">WireShark</span>
-          <span class="ex-chip" onclick="quickFill('TeamViewer','TeamViewer GmbH')">TeamViewer</span>
-          <span class="ex-chip" onclick="quickFill('Notion','Notion Labs')">Notion</span>
-          <span class="ex-chip" onclick="quickFill('FileZilla','Tim Kosse')">FileZilla</span>
-          <span class="ex-chip" onclick="quickFill('7-Zip','Igor Pavlov')">7-Zip</span>
-        </div>
+  <div class="content" id="contentPane">
+    <div class="empty-state">
+      <div class="empty-icon">⟡</div>
+      <h2>No application under review</h2>
+      <p>Fill in the request details and click Analyze to receive an AI-powered risk assessment with CVE data, threat intelligence, and a formal security recommendation.</p>
+      <div class="empty-examples">
+        <span class="ex-chip" onclick="quickFill('WireShark','Wireshark Foundation')">WireShark</span>
+        <span class="ex-chip" onclick="quickFill('TeamViewer','TeamViewer GmbH')">TeamViewer</span>
+        <span class="ex-chip" onclick="quickFill('Notion','Notion Labs')">Notion</span>
+        <span class="ex-chip" onclick="quickFill('FileZilla','Tim Kosse')">FileZilla</span>
+        <span class="ex-chip" onclick="quickFill('7-Zip','Igor Pavlov')">7-Zip</span>
       </div>
     </div>
   </div>
@@ -237,11 +248,10 @@ document.querySelectorAll('.tag').forEach(t => t.addEventListener('click', () =>
 function quickFill(name, vendor) {
   document.getElementById('appName').value = name;
   document.getElementById('appVendor').value = vendor;
-  document.getElementById('appName').focus();
 }
 
 function activeTags(id) {
-  return [...document.querySelectorAll(`#${id} .tag.active`)].map(t => t.dataset.val);
+  return [...document.querySelectorAll('#' + id + ' .tag.active')].map(t => t.dataset.val);
 }
 
 function sevClass(v) {
@@ -256,33 +266,35 @@ function verdictColor(v) { return v==='APPROVE'?'#22c55e':v==='DENY'?'#ef4444':'
 let stepInterval;
 
 function setLoading() {
-  const steps = ['Querying CVE databases','Analysing threat intelligence','Assessing banking risk posture','Generating verdict & report'];
+  const steps = ['Querying CVE databases','Analysing threat intelligence','Assessing banking risk posture','Generating verdict and report'];
   let cur = 0;
-  document.getElementById('contentPane').innerHTML = `
-    <div class="loading-overlay">
-      <div class="loading-ring"></div>
-      <div style="font-size:13px;font-family:var(--mono);color:var(--muted)">Analysing application security...</div>
-      <div class="loading-steps" id="lsteps">
-        ${steps.map((s,i)=>`<div class="lstep" id="lstep${i}">
-          <div class="lstep-dot ${i===0?'active':''}"></div>
-          <span style="color:${i===0?'var(--text)':'var(--muted)'}">${s}</span>
-        </div>`).join('')}
-      </div>
-    </div>`;
-  stepInterval = setInterval(() => {
-    const done = document.querySelector(`.lstep-dot.active`);
+  document.getElementById('contentPane').innerHTML =
+    '<div class="loading-overlay">' +
+      '<div class="loading-ring"></div>' +
+      '<div style="font-size:13px;font-family:var(--mono);color:var(--muted)">Analysing application security...</div>' +
+      '<div class="loading-steps" id="lsteps">' +
+        steps.map(function(s,i){
+          return '<div class="lstep" id="lstep' + i + '">' +
+            '<div class="lstep-dot ' + (i===0?'active':'') + '"></div>' +
+            '<span style="color:' + (i===0?'var(--text)':'var(--muted)') + '">' + s + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+  stepInterval = setInterval(function() {
+    var done = document.querySelector('.lstep-dot.active');
     if (done) { done.classList.remove('active'); done.classList.add('done'); done.parentElement.querySelector('span').style.color='var(--green)'; }
     cur++;
-    const next = document.getElementById(`lstep${cur}`)?.querySelector('.lstep-dot');
-    if (next) { next.classList.add('active'); next.parentElement.querySelector('span').style.color='var(--text)'; }
+    var next = document.getElementById('lstep' + cur);
+    if (next) { var dot = next.querySelector('.lstep-dot'); dot.classList.add('active'); next.querySelector('span').style.color='var(--text)'; }
   }, 3000);
 }
 
 async function runAnalysis() {
-  const appName = document.getElementById('appName').value.trim();
+  var appName = document.getElementById('appName').value.trim();
   if (!appName) { alert('Please enter an application name.'); return; }
 
-  const payload = {
+  var payload = {
     app_name: appName,
     app_version: document.getElementById('appVersion').value.trim(),
     app_vendor: document.getElementById('appVendor').value.trim(),
@@ -292,13 +304,13 @@ async function runAnalysis() {
     permissions: activeTags('permTags'),
   };
 
-  const btn = document.getElementById('analyzeBtn');
+  var btn = document.getElementById('analyzeBtn');
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div> Analyzing...';
   setLoading();
 
   try {
-    const res = await fetch('/api/analyze', {
+    var res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -307,26 +319,23 @@ async function runAnalysis() {
     clearInterval(stepInterval);
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(err.detail || `HTTP ${res.status}`);
+      var err = await res.json().catch(function() { return { detail: res.statusText }; });
+      throw new Error(err.detail || 'HTTP ' + res.status);
     }
 
-    const result = await res.json();
+    var result = await res.json();
     renderResult(result, payload);
-    reviews.unshift({ ...payload, verdict: result.verdict, time: new Date().toLocaleTimeString(), result });
+    reviews.unshift({ app_name: payload.app_name, app_vendor: payload.app_vendor, app_version: payload.app_version, app_env: payload.app_env, data_class: payload.data_class, verdict: result.verdict, time: new Date().toLocaleTimeString(), result: result });
     renderHistory();
 
-  } catch (err) {
+  } catch (e) {
     clearInterval(stepInterval);
-    document.getElementById('contentPane').innerHTML = `
-      <div class="error-box">
-        <strong>Analysis failed</strong><br><br>
-        ${err.message}<br><br>
-        Make sure:<br>
-        1. Ollama is running (download from <code>ollama.com</code>)<br>
-        2. You pulled the model: <code>ollama pull llama3.1</code><br>
-        3. Backend is running: <code>uvicorn app:app --reload</code>
-      </div>`;
+    document.getElementById('contentPane').innerHTML =
+      '<div class="error-box">' +
+        '<strong>Analysis failed</strong><br><br>' +
+        e.message + '<br><br>' +
+        'Check that your ANTHROPIC_API_KEY is set correctly in Railway Variables.' +
+      '</div>';
   }
 
   btn.disabled = false;
@@ -334,126 +343,159 @@ async function runAnalysis() {
 }
 
 function renderHistory() {
-  const sec = document.getElementById('histSection');
+  var sec = document.getElementById('histSection');
   sec.style.display = 'block';
-  document.getElementById('histList').innerHTML = reviews.slice(0, 6).map((h, i) => `
-    <div class="hist-item" onclick="showReview(${i})">
-      <div class="hist-dot" style="background:${verdictColor(h.verdict)}"></div>
-      <div class="hist-name">${h.app_name}</div>
-      <div class="hist-time">${h.time}</div>
-    </div>`).join('');
+  document.getElementById('histList').innerHTML = reviews.slice(0, 6).map(function(h, i) {
+    return '<div class="hist-item" onclick="showReview(' + i + ')">' +
+      '<div class="hist-dot" style="background:' + verdictColor(h.verdict) + '"></div>' +
+      '<div class="hist-name">' + h.app_name + '</div>' +
+      '<div class="hist-time">' + h.time + '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function showReview(i) { renderResult(reviews[i].result, reviews[i]); }
 
 function renderResult(r, ctx) {
-  const vc = verdictC(r.verdict);
-  const scoreC = r.risk_score>=75?'critical':r.risk_score>=50?'high':r.risk_score>=25?'medium':'low';
-  const cvssC  = sevClass(r.cvss_estimate||0);
-  const expC   = (r.exploit_maturity==='Active Exploitation'||r.exploit_maturity==='Weaponized')?'critical':r.exploit_maturity==='Proof of Concept'?'high':'low';
+  var vc = verdictC(r.verdict);
+  var scoreC = r.risk_score>=75?'critical':r.risk_score>=50?'high':r.risk_score>=25?'medium':'low';
+  var cvssC = sevClass(r.cvss_estimate||0);
+  var expC = (r.exploit_maturity==='Active Exploitation'||r.exploit_maturity==='Weaponized')?'critical':r.exploit_maturity==='Proof of Concept'?'high':'low';
 
-  const vulnsHtml = (r.known_vulnerabilities||[]).length
-    ? r.known_vulnerabilities.map(v => `
-        <div class="vuln-item ${v.severity.toLowerCase()}">
-          <div class="vuln-cve">${v.cve_id}</div>
-          <div class="vuln-detail">
-            <div class="vuln-title">${v.title}</div>
-            <div class="vuln-desc">${v.description}</div>
-          </div>
-          <div class="vuln-sev ${v.severity.toLowerCase()}">${v.severity} ${v.cvss_score?Number(v.cvss_score).toFixed(1):''}</div>
-        </div>`).join('')
-    : '<div class="prose" style="color:var(--muted)">No specific CVEs on record — absence does not imply risk-free.</div>';
+  // Build vulnerability HTML
+  var vulnsHtml = '';
+  var vulns = r.known_vulnerabilities || [];
+  if (vulns.length > 0) {
+    for (var i = 0; i < vulns.length; i++) {
+      var v = vulns[i];
+      var sev = (v.severity || 'medium').toLowerCase();
+      vulnsHtml += '<div class="vuln-item ' + sev + '">' +
+        '<div class="vuln-cve">' + (v.cve_id || 'N/A') + '</div>' +
+        '<div class="vuln-detail">' +
+          '<div class="vuln-title">' + (v.title || 'Unknown') + '</div>' +
+          '<div class="vuln-desc">' + (v.description || '') + '</div>' +
+        '</div>' +
+        '<div class="vuln-sev ' + sev + '">' + (v.severity || 'MEDIUM') + ' ' + (v.cvss_score ? Number(v.cvss_score).toFixed(1) : '') + '</div>' +
+      '</div>';
+    }
+  } else {
+    vulnsHtml = '<div class="prose">No specific CVEs on record.</div>';
+  }
 
-  const condHtml = (r.conditions||[]).map((c,i)=>`<div class="cond-item"><span class="cond-num">${i+1}.</span>${c}</div>`).join('');
-  const remHtml  = (r.remediation_actions||[]).map(c=>`<div class="cond-item"><span class="cond-num">→</span>${c}</div>`).join('');
+  // Build conditions HTML
+  var condHtml = '';
+  var conds = r.conditions || [];
+  for (var i = 0; i < conds.length; i++) {
+    condHtml += '<div class="cond-item"><span class="cond-num">' + (i+1) + '.</span>' + conds[i] + '</div>';
+  }
 
-  const barsHtml = Object.entries(r.risk_dimensions||{}).map(([k,v])=>{
-    const label = k.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
-    const col = v>=75?'var(--red)':v>=50?'var(--amber)':v>=25?'#fb923c':'var(--green)';
-    return `<div class="rbar-row">
-      <div class="rbar-head"><span>${label}</span><span>${Math.round(v)}/100</span></div>
-      <div class="rbar-track"><div class="rbar-fill" style="width:${v}%;background:${col}"></div></div>
-    </div>`;
-  }).join('');
+  // Build remediation HTML
+  var remHtml = '';
+  var rems = r.remediation_actions || [];
+  for (var i = 0; i < rems.length; i++) {
+    remHtml += '<div class="cond-item"><span class="cond-num">→</span>' + rems[i] + '</div>';
+  }
 
-  document.getElementById('contentPane').innerHTML = `
-    <div class="result-header">
-      <div class="app-identity">
-        <div class="app-name">${ctx.app_name}</div>
-        <div class="app-meta">
-          ${ctx.app_vendor?`<span>${ctx.app_vendor}</span>`:''}
-          ${ctx.app_version?`<span>v${ctx.app_version}</span>`:''}
-          <span>${(ctx.app_env||'').replace(/_/g,' ')}</span>
-          ${ctx.data_class?.length?`<span>${ctx.data_class.join(', ')}</span>`:''}
-        </div>
-      </div>
-      <div class="verdict-badge ${vc}">
-        <div class="verdict-icon">${verdictIcon(r.verdict)}</div>
-        <div>
-          <div class="verdict-label">Security Verdict</div>
-          <div class="verdict-text">${r.verdict}</div>
-          <div class="verdict-reason">${r.verdict_reason||''}</div>
-        </div>
-      </div>
-    </div>
+  // Build risk bars HTML
+  var barsHtml = '';
+  var dims = r.risk_dimensions || {};
+  var dimKeys = Object.keys(dims);
+  for (var i = 0; i < dimKeys.length; i++) {
+    var k = dimKeys[i];
+    var val = dims[k];
+    var label = k.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+    var col = val>=75?'var(--red)':val>=50?'var(--amber)':val>=25?'#fb923c':'var(--green)';
+    barsHtml += '<div class="rbar-row">' +
+      '<div class="rbar-head"><span>' + label + '</span><span>' + Math.round(val) + '/100</span></div>' +
+      '<div class="rbar-track"><div class="rbar-fill" style="width:' + val + '%;background:' + col + '"></div></div>' +
+    '</div>';
+  }
 
-    <div class="score-row">
-      <div class="score-card">
-        <div class="score-lbl">Risk Score</div>
-        <div class="score-val c-${scoreC}">${Math.round(r.risk_score||0)}</div>
-        <div class="score-sub">out of 100</div>
-      </div>
-      <div class="score-card">
-        <div class="score-lbl">CVSS Estimate</div>
-        <div class="score-val c-${cvssC}">${Number(r.cvss_estimate||0).toFixed(1)}</div>
-        <div class="score-sub">avg severity</div>
-      </div>
-      <div class="score-card">
-        <div class="score-lbl">Known CVEs</div>
-        <div class="score-val c-info">${r.cve_count_estimate||0}</div>
-        <div class="score-sub">on record</div>
-      </div>
-      <div class="score-card">
-        <div class="score-lbl">Exploit Maturity</div>
-        <div class="score-val sm c-${expC}">${r.exploit_maturity||'Unknown'}</div>
-      </div>
-    </div>
+  // Build full HTML
+  var html = '<div class="content-inner">';
 
-    <div class="section-card">
-      <div class="section-head"><div class="section-ico ico-blue">◈</div><div class="section-title">Executive Summary</div></div>
-      <div class="section-body"><div class="prose">${r.executive_summary||''}</div></div>
-    </div>
+  // Header
+  html += '<div class="result-header">' +
+    '<div class="app-identity">' +
+      '<div class="app-name">' + (ctx.app_name || '') + '</div>' +
+      '<div class="app-meta">' +
+        (ctx.app_vendor ? '<span>' + ctx.app_vendor + '</span>' : '') +
+        (ctx.app_version ? '<span>v' + ctx.app_version + '</span>' : '') +
+        '<span>' + ((ctx.app_env || '').replace(/_/g, ' ')) + '</span>' +
+        (ctx.data_class && ctx.data_class.length ? '<span>' + ctx.data_class.join(', ') + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="verdict-badge ' + vc + '">' +
+      '<div class="verdict-icon">' + verdictIcon(r.verdict) + '</div>' +
+      '<div>' +
+        '<div class="verdict-label">Security Verdict</div>' +
+        '<div class="verdict-text">' + r.verdict + '</div>' +
+        '<div class="verdict-reason">' + (r.verdict_reason || '') + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
 
-    <div class="section-card">
-      <div class="section-head"><div class="section-ico ico-red">⚠</div><div class="section-title">Known Vulnerabilities &amp; CVEs</div></div>
-      <div class="section-body"><div class="vuln-list">${vulnsHtml}</div></div>
-    </div>
+  // Scores
+  html += '<div class="score-row">' +
+    '<div class="score-card"><div class="score-lbl">Risk Score</div><div class="score-val c-' + scoreC + '">' + Math.round(r.risk_score||0) + '</div><div class="score-sub">out of 100</div></div>' +
+    '<div class="score-card"><div class="score-lbl">CVSS Estimate</div><div class="score-val c-' + cvssC + '">' + Number(r.cvss_estimate||0).toFixed(1) + '</div><div class="score-sub">avg severity</div></div>' +
+    '<div class="score-card"><div class="score-lbl">Known CVEs</div><div class="score-val c-info">' + (r.cve_count_estimate||0) + '</div><div class="score-sub">on record</div></div>' +
+    '<div class="score-card"><div class="score-lbl">Exploit Maturity</div><div class="score-val sm c-' + expC + '">' + (r.exploit_maturity||'Unknown') + '</div></div>' +
+  '</div>';
 
-    <div class="section-card">
-      <div class="section-head"><div class="section-ico ico-purple">◉</div><div class="section-title">Risk Dimension Analysis</div></div>
-      <div class="section-body"><div class="risk-bars">${barsHtml}</div></div>
-    </div>
+  // Executive Summary
+  html += '<div class="section-card">' +
+    '<div class="section-head"><div class="section-ico ico-blue">◈</div><div class="section-title">Executive Summary</div></div>' +
+    '<div class="section-body"><div class="prose">' + (r.executive_summary || 'No summary available.') + '</div></div>' +
+  '</div>';
 
-    <div class="section-card">
-      <div class="section-head"><div class="section-ico ico-amber">⬡</div><div class="section-title">Threat Intelligence</div></div>
-      <div class="section-body"><div class="prose">${r.threat_intelligence||''}</div></div>
-    </div>
+  // CVEs
+  html += '<div class="section-card">' +
+    '<div class="section-head"><div class="section-ico ico-red">⚠</div><div class="section-title">Known Vulnerabilities &amp; CVEs</div></div>' +
+    '<div class="section-body"><div class="vuln-list">' + vulnsHtml + '</div></div>' +
+  '</div>';
 
-    ${condHtml?`<div class="section-card">
-      <div class="section-head"><div class="section-ico ico-amber">◐</div><div class="section-title">${r.verdict==='CONDITIONAL'?'Approval Conditions':'Risk Caveats'}</div></div>
-      <div class="section-body"><div class="cond-list">${condHtml}</div></div>
-    </div>`:''}
+  // Risk Dimensions
+  if (barsHtml) {
+    html += '<div class="section-card">' +
+      '<div class="section-head"><div class="section-ico ico-purple">◉</div><div class="section-title">Risk Dimension Analysis</div></div>' +
+      '<div class="section-body"><div class="risk-bars">' + barsHtml + '</div></div>' +
+    '</div>';
+  }
 
-    ${remHtml?`<div class="section-card">
-      <div class="section-head"><div class="section-ico ico-green">✦</div><div class="section-title">Remediation &amp; Control Recommendations</div></div>
-      <div class="section-body"><div class="cond-list">${remHtml}</div></div>
-    </div>`:''}
+  // Threat Intelligence
+  html += '<div class="section-card">' +
+    '<div class="section-head"><div class="section-ico ico-amber">⬡</div><div class="section-title">Threat Intelligence</div></div>' +
+    '<div class="section-body"><div class="prose">' + (r.threat_intelligence || 'No specific threat intelligence available.') + '</div></div>' +
+  '</div>';
 
-    ${r.regulatory_note?`<div class="section-card">
-      <div class="section-head"><div class="section-ico ico-blue">⊞</div><div class="section-title">Regulatory Implications</div></div>
-      <div class="section-body"><div class="prose">${r.regulatory_note}</div></div>
-    </div>`:''}
-  `;
+  // Conditions
+  if (condHtml) {
+    html += '<div class="section-card">' +
+      '<div class="section-head"><div class="section-ico ico-amber">◐</div><div class="section-title">' + (r.verdict==='CONDITIONAL'?'Approval Conditions':'Risk Caveats') + '</div></div>' +
+      '<div class="section-body"><div class="cond-list">' + condHtml + '</div></div>' +
+    '</div>';
+  }
+
+  // Remediation
+  if (remHtml) {
+    html += '<div class="section-card">' +
+      '<div class="section-head"><div class="section-ico ico-green">✦</div><div class="section-title">Remediation &amp; Control Recommendations</div></div>' +
+      '<div class="section-body"><div class="cond-list">' + remHtml + '</div></div>' +
+    '</div>';
+  }
+
+  // Regulatory
+  if (r.regulatory_note) {
+    html += '<div class="section-card">' +
+      '<div class="section-head"><div class="section-ico ico-blue">⊞</div><div class="section-title">Regulatory Implications</div></div>' +
+      '<div class="section-body"><div class="prose">' + r.regulatory_note + '</div></div>' +
+    '</div>';
+  }
+
+  html += '</div>';
+  document.getElementById('contentPane').innerHTML = html;
+  document.getElementById('contentPane').scrollTop = 0;
 }
 </script>
 </body>
