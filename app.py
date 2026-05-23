@@ -33,29 +33,29 @@ def build_messages(req: ReviewRequest) -> tuple:
     data_class = ", ".join(req.data_class) if req.data_class else "Not specified"
     permissions = ", ".join(req.permissions) if req.permissions else "Not specified"
 
-    system_msg = """You are a senior cybersecurity analyst in the Threat and Vulnerability Management team at a major bank. You review non-standard software installation requests and provide formal security assessments.
+    system_msg = """You are a senior cybersecurity analyst. You review software installation requests for organizations and provide formal security assessments.
 
 You MUST respond with ONLY a valid JSON object. No markdown. No backticks. No explanation before or after. Just the raw JSON starting with { and ending with }.
 
 EVERY text field must contain at least 2-3 detailed, specific sentences. Do NOT leave any field empty or with placeholder text."""
 
-    user_msg = f"""Perform a formal security review of this non-standard application request for a banking environment:
+    user_msg = f"""Perform a formal security review of this application request for an organization:
 
 - Application: {app_name}
 - Version: {version}
 - Vendor: {vendor}
 - Deployment Environment: {env}
 - Business Justification: {justification}
-- Data Classification Exposure: {data_class}
+- Data Sensitivity: {data_class}
 - Required Permissions: {permissions}
 
-Assess using: known CVEs, vulnerability history, threat actor interest, supply chain risk, exploit availability, and banking regulatory implications (PCI-DSS, GDPR, FCA, PRA, SOX, Basel III).
+Assess using: known CVEs, vulnerability history, threat actor interest, supply chain risk, exploit availability, and regulatory implications (GDPR, SOC 2, ISO 27001, PCI-DSS where applicable).
 
 Return this exact JSON structure. Fill ALL fields with real, detailed, specific content about {app_name}:
 
 {{
   "verdict": "APPROVE or DENY or CONDITIONAL - pick one",
-  "verdict_reason": "One detailed sentence explaining why you chose this verdict specifically for {app_name} in a banking environment",
+  "verdict_reason": "One detailed sentence explaining why you chose this verdict specifically for {app_name}",
   "risk_score": 65,
   "cvss_estimate": 6.5,
   "cve_count_estimate": 12,
@@ -67,21 +67,21 @@ Return this exact JSON structure. Fill ALL fields with real, detailed, specific 
     "regulatory_compliance_risk": 65,
     "threat_actor_interest": 50
   }},
-  "executive_summary": "Write 3-4 detailed sentences about {app_name} security posture specifically in a banking context. Mention specific risks, vulnerability patterns, and your professional recommendation. Be specific - do not use generic language.",
+  "executive_summary": "Write 3-4 detailed sentences about {app_name} security posture for organizations. Mention specific risks, vulnerability patterns, and your professional recommendation. Be specific - do not use generic language.",
   "known_vulnerabilities": [
     {{
       "cve_id": "CVE-XXXX-XXXXX",
       "title": "Name of a real known vulnerability in {app_name}",
       "severity": "HIGH",
       "cvss_score": 7.5,
-      "description": "Write 2 specific sentences about this vulnerability in {app_name}, how it can be exploited, and its impact on banking systems."
+      "description": "Write 2 specific sentences about this vulnerability in {app_name}, how it can be exploited, and its impact on organizations."
     }},
     {{
       "cve_id": "CVE-XXXX-XXXXX",
       "title": "Another real vulnerability",
       "severity": "MEDIUM",
       "cvss_score": 5.5,
-      "description": "Write 2 specific sentences about this vulnerability and why it matters for financial institutions."
+      "description": "Write 2 specific sentences about this vulnerability and why it matters for organizations handling sensitive data."
     }},
     {{
       "cve_id": "CVE-XXXX-XXXXX",
@@ -93,7 +93,7 @@ Return this exact JSON structure. Fill ALL fields with real, detailed, specific 
   ],
   "threat_intelligence": "Write 3 detailed sentences about how threat actors have targeted {app_name}. Mention specific APT groups, campaigns, or attack patterns if known. Describe any supply chain risks, trojanized versions, or targeted attacks against this software.",
   "conditions": [
-    "First specific condition required before {app_name} can be approved in the bank",
+    "First specific condition required before {app_name} can be approved",
     "Second specific security control or requirement",
     "Third specific condition related to monitoring or access control",
     "Fourth condition if applicable"
@@ -104,7 +104,7 @@ Return this exact JSON structure. Fill ALL fields with real, detailed, specific 
     "Third specific monitoring or hardening step",
     "Fourth action if applicable"
   ],
-  "regulatory_note": "Write 2-3 specific sentences about how deploying {app_name} affects PCI-DSS, GDPR, FCA, SOX, or other banking regulatory compliance. Reference specific requirements or articles that are relevant."
+  "regulatory_note": "Write 2-3 specific sentences about how deploying {app_name} affects GDPR, SOC 2, ISO 27001, PCI-DSS, or other regulatory compliance. Reference specific requirements that are relevant."
 }}
 
 RULES:
@@ -112,7 +112,7 @@ RULES:
 2. Every text field MUST have at least 2 full detailed sentences - no exceptions.
 3. All number fields must be actual numbers, not strings.
 4. The verdict must be exactly APPROVE, DENY, or CONDITIONAL.
-5. Be conservative - this is a bank. Err on the side of caution.
+5. Be thorough and security-focused. Err on the side of caution.
 6. Output ONLY the JSON. No other text."""
 
     return system_msg, user_msg
