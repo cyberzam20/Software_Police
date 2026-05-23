@@ -239,7 +239,7 @@ async def call_anthropic(messages: list) -> str:
                 "content-type": "application/json",
             },
             json={
-                "model": "claude-sonnet-4-20250514",
+                "model": "claude-3-5-sonnet-20241022",
                 "max_tokens": 3000,
                 "system": messages[0]["content"],
                 "messages": [{"role": "user", "content": prompt}],
