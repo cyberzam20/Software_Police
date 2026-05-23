@@ -196,6 +196,70 @@
 
   .error-box { background: var(--red-bg); border: 1px solid var(--red-border); border-radius: 10px; padding: 18px; font-size: 13px; color: var(--red); line-height: 1.7; }
   .error-box code { font-family: var(--mono); font-size: 12px; background: rgba(220,38,38,0.08); padding: 2px 6px; border-radius: 4px; }
+
+  /* Live data sources */
+  .data-sources { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .src-badge {
+    font-size: 9px; font-family: var(--mono); padding: 2px 8px;
+    background: var(--accent-light); color: var(--accent);
+    border-radius: 20px; font-weight: 600; letter-spacing: 0.04em;
+  }
+
+  /* KEV alert */
+  .kev-alert {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    border: 2px solid var(--red);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .kev-icon { font-size: 28px; flex-shrink: 0; }
+  .kev-content { flex: 1; }
+  .kev-title { font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 4px; }
+  .kev-subtitle { font-size: 12px; color: #7f1d1d; margin-bottom: 10px; line-height: 1.5; }
+  .kev-items { display: flex; flex-direction: column; gap: 8px; }
+  .kev-item {
+    background: rgba(255,255,255,0.7);
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 12px; color: #7f1d1d; line-height: 1.5;
+  }
+  .kev-cve { font-family: var(--mono); font-weight: 600; color: var(--red); }
+  .kev-ransomware {
+    display: inline-block; font-size: 10px; padding: 2px 8px;
+    background: var(--red); color: white;
+    border-radius: 20px; margin-left: 6px; font-weight: 600;
+  }
+
+  /* Malware/Download blocks */
+  .info-block { background: var(--surface2); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+  .info-block:last-child { margin-bottom: 0; }
+  .info-block-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+  .info-block-content { font-size: 13px; color: #4b5563; line-height: 1.6; word-wrap: break-word; }
+  .info-block.warn { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+  .info-block.warn .info-block-label { color: var(--amber); }
+  .info-block.success { background: var(--green-bg); border-left: 3px solid var(--green); }
+  .info-block.success .info-block-label { color: var(--green); }
+  .info-block.danger { background: var(--red-bg); border-left: 3px solid var(--red); }
+  .info-block.danger .info-block-label { color: var(--red); }
+
+  /* CVE detail with EPSS */
+  .vuln-meta { display: flex; gap: 10px; font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+  .vuln-meta-item { display: flex; align-items: center; gap: 4px; }
+  .epss-pill {
+    display: inline-block; font-size: 10px; padding: 1px 7px;
+    background: var(--accent-light); color: var(--accent);
+    border-radius: 20px; font-weight: 600;
+  }
+  .epss-pill.high { background: var(--red-bg); color: var(--red); }
+  .epss-pill.med { background: var(--amber-bg); color: var(--amber); }
+
+  .cve-link {
+    font-size: 10px; color: var(--accent); text-decoration: none;
+    font-family: var(--mono); padding: 1px 6px;
+    background: var(--accent-light); border-radius: 4px;
+    margin-left: 4px; font-weight: 600;
+  }
+  .cve-link:hover { background: var(--accent); color: white; }
 </style>
 </head>
 <body>
@@ -203,9 +267,14 @@
   <div class="logo-icon">🛡</div>
   <div class="topbar-brand">
     <span class="topbar-title">Software Police</span>
-    <span class="topbar-sub">AI-Powered Application Security Review</span>
+    <span class="topbar-sub">AI Security Review · Powered by live threat intelligence</span>
   </div>
-  <span class="topbar-badge">AI SECURITY</span>
+  <div class="data-sources">
+    <span class="src-badge">NVD</span>
+    <span class="src-badge">CISA KEV</span>
+    <span class="src-badge">EPSS</span>
+    <span class="src-badge">CLAUDE AI</span>
+  </div>
 </div>
 <div class="main">
   <div class="sidebar">
@@ -312,7 +381,7 @@ function verdictColor(v) { return v==='APPROVE'?'#16a34a':v==='DENY'?'#dc2626':'
 var stepInterval;
 
 function setLoading() {
-  var steps = ['Searching vulnerability databases','Analysing threat intelligence','Assessing security posture','Generating verdict and report'];
+  var steps = ['Fetching CVEs from NIST NVD','Checking CISA KEV catalog','Calculating EPSS exploit scores','AI threat analysis & verdict'];
   var cur = 0;
   document.getElementById('contentPane').innerHTML =
     '<div class="loading-overlay">' +
@@ -380,14 +449,65 @@ function renderResult(r, ctx) {
   var cvssC = sevClass(r.cvss_estimate||0);
   var expC = (r.exploit_maturity==='Active Exploitation'||r.exploit_maturity==='Weaponized')?'critical':r.exploit_maturity==='Proof of Concept'?'high':'low';
 
+  var liveData = r._live_data || {};
+  var latestCves = liveData.latest_cves || [];
+  var kevEntries = liveData.kev_entries || [];
+  var epssData = liveData.epss_data || {};
+
+  // Build CVE list - prefer live NVD data, fall back to AI-generated
   var vulnsHtml = '';
-  var vulns = r.known_vulnerabilities || [];
-  if (vulns.length > 0) {
-    for (var i = 0; i < vulns.length; i++) {
-      var v = vulns[i]; var sev = (v.severity || 'medium').toLowerCase();
-      vulnsHtml += '<div class="vuln-item ' + sev + '"><div class="vuln-cve">' + (v.cve_id||'N/A') + '</div><div class="vuln-detail"><div class="vuln-title">' + (v.title||'Unknown') + '</div><div class="vuln-desc">' + (v.description||'') + '</div></div><div class="vuln-sev ' + sev + '">' + (v.severity||'MEDIUM') + ' ' + (v.cvss_score?Number(v.cvss_score).toFixed(1):'') + '</div></div>';
+  var vulnsToShow = latestCves.length > 0 ? latestCves : (r.known_vulnerabilities || []);
+  if (vulnsToShow.length > 0) {
+    for (var i = 0; i < vulnsToShow.length; i++) {
+      var v = vulnsToShow[i];
+      var sev = (v.severity || 'medium').toLowerCase();
+      var cveId = v.cve_id || 'N/A';
+      var epss = epssData[cveId] || {};
+      var epssScore = epss.epss_score || v.epss_score || 0;
+      var epssClass = epssScore >= 50 ? 'high' : epssScore >= 10 ? 'med' : '';
+      var desc = v.description || v.title || '';
+      var nvdLink = v.nvd_url ? '<a href="' + v.nvd_url + '" target="_blank" class="cve-link">NVD ↗</a>' : '';
+
+      vulnsHtml += '<div class="vuln-item ' + sev + '">' +
+        '<div class="vuln-cve">' + cveId + nvdLink + '</div>' +
+        '<div class="vuln-detail">' +
+          '<div class="vuln-title">' + (v.title || v.vulnerability_name || 'Vulnerability') + '</div>' +
+          '<div class="vuln-desc">' + desc + '</div>' +
+          '<div class="vuln-meta">' +
+            (v.published ? '<span class="vuln-meta-item">📅 ' + v.published + '</span>' : '') +
+            (epssScore > 0 ? '<span class="vuln-meta-item">EPSS: <span class="epss-pill ' + epssClass + '">' + epssScore + '%</span></span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="vuln-sev ' + sev + '">' + (v.severity || 'MEDIUM') + ' ' + (v.cvss_score?Number(v.cvss_score).toFixed(1):'') + '</div>' +
+      '</div>';
     }
-  } else { vulnsHtml = '<div class="prose">No specific CVEs identified for this application.</div>'; }
+  } else {
+    vulnsHtml = '<div class="prose">No specific CVEs identified for this application in NIST NVD.</div>';
+  }
+
+  // KEV alert
+  var kevHtml = '';
+  if (kevEntries.length > 0) {
+    var kevItemsHtml = '';
+    for (var i = 0; i < kevEntries.length; i++) {
+      var k = kevEntries[i];
+      var ransomBadge = (k.ransomware_use && k.ransomware_use.toLowerCase() === 'known') ? '<span class="kev-ransomware">RANSOMWARE</span>' : '';
+      kevItemsHtml += '<div class="kev-item">' +
+        '<span class="kev-cve">' + k.cve_id + '</span>' + ransomBadge +
+        '<br><strong>' + (k.vulnerability_name || '') + '</strong>' +
+        '<br>' + (k.short_description || '') +
+        '<br><em style="font-size:11px;margin-top:4px;display:inline-block">Required Action: ' + (k.required_action || 'See CISA guidance') + '</em>' +
+      '</div>';
+    }
+    kevHtml = '<div class="kev-alert">' +
+      '<div class="kev-icon">🚨</div>' +
+      '<div class="kev-content">' +
+        '<div class="kev-title">CISA Known Exploited Vulnerabilities — Active Threats</div>' +
+        '<div class="kev-subtitle">This software has ' + kevEntries.length + ' vulnerabilit' + (kevEntries.length === 1 ? 'y' : 'ies') + ' on CISA\'s Known Exploited Vulnerabilities catalog. These are being actively exploited in the wild.</div>' +
+        '<div class="kev-items">' + kevItemsHtml + '</div>' +
+      '</div>' +
+    '</div>';
+  }
 
   var condHtml = '';
   var conds = r.conditions || [];
@@ -407,16 +527,69 @@ function renderResult(r, ctx) {
     barsHtml += '<div class="rbar-row"><div class="rbar-head"><span>' + label + '</span><span>' + Math.round(val) + '/100</span></div><div class="rbar-track"><div class="rbar-fill" style="width:' + val + '%;background:' + col + '"></div></div></div>';
   }
 
+  // Malware intelligence
+  var malwareHtml = '';
+  var mal = r.malware_intelligence || {};
+  if (mal.known_malware_campaigns || mal.supply_chain_incidents || mal.trojanized_distributions) {
+    if (mal.known_malware_campaigns) {
+      malwareHtml += '<div class="info-block danger"><div class="info-block-label">⚠ Known Malware Campaigns</div><div class="info-block-content">' + mal.known_malware_campaigns + '</div></div>';
+    }
+    if (mal.supply_chain_incidents) {
+      malwareHtml += '<div class="info-block warn"><div class="info-block-label">🔗 Supply Chain Incidents</div><div class="info-block-content">' + mal.supply_chain_incidents + '</div></div>';
+    }
+    if (mal.trojanized_distributions) {
+      malwareHtml += '<div class="info-block warn"><div class="info-block-label">🦠 Trojanized / Fake Versions</div><div class="info-block-content">' + mal.trojanized_distributions + '</div></div>';
+    }
+  }
+
+  // Download recommendations
+  var downloadHtml = '';
+  var dl = r.download_recommendations || {};
+  if (dl.official_source || dl.verification_method || dl.avoid_sources) {
+    if (dl.official_source) {
+      downloadHtml += '<div class="info-block success"><div class="info-block-label">✓ Official Download Source</div><div class="info-block-content">' + dl.official_source + '</div></div>';
+    }
+    if (dl.verification_method) {
+      downloadHtml += '<div class="info-block"><div class="info-block-label">🔐 Verification Method</div><div class="info-block-content">' + dl.verification_method + '</div></div>';
+    }
+    if (dl.avoid_sources) {
+      downloadHtml += '<div class="info-block danger"><div class="info-block-label">✕ Sources to Avoid</div><div class="info-block-content">' + dl.avoid_sources + '</div></div>';
+    }
+  }
+
   var html = '<div class="content-inner">';
   html += '<div class="result-header"><div class="app-identity"><div class="app-name">' + (ctx.app_name||'') + '</div><div class="app-meta">' + (ctx.app_vendor?'<span>'+ctx.app_vendor+'</span>':'') + (ctx.app_version?'<span>v'+ctx.app_version+'</span>':'') + '<span>' + ((ctx.app_env||'').replace(/_/g,' ')) + '</span>' + (ctx.data_class&&ctx.data_class.length?'<span>'+ctx.data_class.join(', ')+'</span>':'') + '</div></div><div class="verdict-badge ' + vc + '"><div class="verdict-icon">' + verdictIcon(r.verdict) + '</div><div><div class="verdict-label">Security Verdict</div><div class="verdict-text">' + r.verdict + '</div><div class="verdict-reason">' + (r.verdict_reason||'') + '</div></div></div></div>';
-  html += '<div class="score-row"><div class="score-card"><div class="score-lbl">Risk Score</div><div class="score-val c-' + scoreC + '">' + Math.round(r.risk_score||0) + '</div><div class="score-sub">out of 100</div></div><div class="score-card"><div class="score-lbl">CVSS Estimate</div><div class="score-val c-' + cvssC + '">' + Number(r.cvss_estimate||0).toFixed(1) + '</div><div class="score-sub">avg severity</div></div><div class="score-card"><div class="score-lbl">Known CVEs</div><div class="score-val c-info">' + (r.cve_count_estimate||0) + '</div><div class="score-sub">on record</div></div><div class="score-card"><div class="score-lbl">Exploit Maturity</div><div class="score-val sm c-' + expC + '">' + (r.exploit_maturity||'Unknown') + '</div></div></div>';
+
+  // KEV alert at the top if exists
+  if (kevHtml) html += kevHtml;
+
+  html += '<div class="score-row"><div class="score-card"><div class="score-lbl">Risk Score</div><div class="score-val c-' + scoreC + '">' + Math.round(r.risk_score||0) + '</div><div class="score-sub">out of 100</div></div><div class="score-card"><div class="score-lbl">CVSS Estimate</div><div class="score-val c-' + cvssC + '">' + Number(r.cvss_estimate||0).toFixed(1) + '</div><div class="score-sub">avg severity</div></div><div class="score-card"><div class="score-lbl">Live CVEs</div><div class="score-val c-info">' + (liveData.nvd_cve_count || r.cve_count_estimate || 0) + '</div><div class="score-sub">from NVD</div></div><div class="score-card"><div class="score-lbl">Exploit Maturity</div><div class="score-val sm c-' + expC + '">' + (r.exploit_maturity||'Unknown') + '</div></div></div>';
+
   html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-blue">◈</div><div class="section-title">Executive Summary</div></div><div class="section-body"><div class="prose">' + (r.executive_summary||'No summary available.') + '</div></div></div>';
-  html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-red">⚠</div><div class="section-title">Known Vulnerabilities &amp; CVEs</div></div><div class="section-body"><div class="vuln-list">' + vulnsHtml + '</div></div></div>';
+
+  html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-red">⚠</div><div class="section-title">Latest Vulnerabilities (Live from NVD + EPSS)</div></div><div class="section-body"><div class="vuln-list">' + vulnsHtml + '</div></div></div>';
+
+  if (malwareHtml) {
+    html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-red">🦠</div><div class="section-title">Malware &amp; Threat Distribution Intelligence</div></div><div class="section-body">' + malwareHtml + '</div></div>';
+  }
+
+  if (downloadHtml) {
+    html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-green">⬇</div><div class="section-title">Safe Download Guidance</div></div><div class="section-body">' + downloadHtml + '</div></div>';
+  }
+
   if (barsHtml) { html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-purple">◉</div><div class="section-title">Risk Dimension Analysis</div></div><div class="section-body"><div class="risk-bars">' + barsHtml + '</div></div></div>'; }
+
   html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-amber">⬡</div><div class="section-title">Threat Intelligence</div></div><div class="section-body"><div class="prose">' + (r.threat_intelligence||'No specific threat intelligence available.') + '</div></div></div>';
+
   if (condHtml) { html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-amber">◐</div><div class="section-title">' + (r.verdict==='CONDITIONAL'?'Approval Conditions':'Risk Caveats') + '</div></div><div class="section-body"><div class="cond-list">' + condHtml + '</div></div></div>'; }
   if (remHtml) { html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-green">✦</div><div class="section-title">Remediation &amp; Control Recommendations</div></div><div class="section-body"><div class="cond-list">' + remHtml + '</div></div></div>'; }
   if (r.regulatory_note) { html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-blue">⊞</div><div class="section-title">Regulatory Implications</div></div><div class="section-body"><div class="prose">' + r.regulatory_note + '</div></div></div>'; }
+
+  // Data freshness footer
+  if (r.data_freshness) {
+    html += '<div style="font-size:11px;color:var(--muted);text-align:center;padding:8px 0;font-family:var(--mono)">' + r.data_freshness + '</div>';
+  }
+
   html += '</div>';
   document.getElementById('contentPane').innerHTML = html;
   document.getElementById('contentPane').scrollTop = 0;
