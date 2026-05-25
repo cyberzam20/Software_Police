@@ -6,291 +6,339 @@
 <title>Software Police — AI Security Review</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f5f6fa; --surface: #ffffff; --surface2: #f0f1f5;
-    --border: #e2e5ee; --border2: #d1d5e0;
-    --text: #1a1d27; --muted: #6b7280; --muted2: #9ca3af;
-    --accent: #2563eb; --accent2: #1d4ed8; --accent-light: #dbeafe;
-    --green: #16a34a; --green-bg: #dcfce7; --green-border: #86efac;
-    --red: #dc2626; --red-bg: #fee2e2; --red-border: #fca5a5;
-    --amber: #d97706; --amber-bg: #fef3c7; --amber-border: #fcd34d;
-    --purple: #7c3aed;
-    --font: 'Inter', sans-serif; --mono: 'JetBrains Mono', monospace;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
-  }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#f4f6fb; --surface:#fff; --surface2:#f0f2f8;
+  --border:#e3e7f0; --border2:#d1d7e8;
+  --text:#1a1d2e; --muted:#6b7280; --muted2:#9ca3af;
+  --accent:#2563eb; --accent-d:#1d4ed8; --accent-l:#dbeafe;
+  --green:#16a34a; --green-bg:#dcfce7; --green-b:#86efac;
+  --red:#dc2626; --red-bg:#fee2e2; --red-b:#fca5a5;
+  --amber:#d97706; --amber-bg:#fef3c7; --amber-b:#fcd34d;
+  --purple:#7c3aed; --purple-bg:#ede9fe;
+  --font:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --sh-lg:0 4px 16px rgba(0,0,0,.09);
+}
+body { background:var(--bg); color:var(--text); font-family:var(--font); font-size:14px; }
 
-  /* Topbar */
-  .topbar {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 24px; border-bottom: 1px solid var(--border);
-    background: var(--surface); position: sticky; top: 0; z-index: 100;
-    box-shadow: var(--shadow);
-  }
-  .logo-icon {
-    width: 34px; height: 34px; border-radius: 8px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 18px; font-weight: 700;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
-  }
-  .topbar-brand { display: flex; flex-direction: column; }
-  .topbar-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
-  .topbar-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
-  .topbar-badge {
-    margin-left: auto; font-size: 10px; font-weight: 500;
-    padding: 3px 10px; border-radius: 20px;
-    background: var(--accent-light); color: var(--accent);
-    font-family: var(--mono); letter-spacing: 0.03em;
-  }
+/* ── Topbar ── */
+.topbar {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 24px; border-bottom:1px solid var(--border);
+  background:var(--surface); position:sticky; top:0; z-index:200;
+  box-shadow:var(--sh);
+}
+.logo {
+  width:36px; height:36px; border-radius:9px; flex-shrink:0;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  display:flex; align-items:center; justify-content:center;
+  font-size:19px; box-shadow:0 2px 8px rgba(37,99,235,.3);
+}
+.brand-title { font-size:15px; font-weight:700; letter-spacing:-.01em; }
+.brand-sub   { font-size:11px; color:var(--muted); margin-top:1px; }
+.src-pills   { display:flex; gap:5px; margin-left:auto; flex-wrap:wrap; }
+.src-pill {
+  font-size:9px; font-family:var(--mono); padding:3px 8px;
+  background:var(--accent-l); color:var(--accent);
+  border-radius:20px; font-weight:600; letter-spacing:.04em;
+}
+.src-pill.live { background:var(--green-bg); color:var(--green); }
 
-  .main { display: flex; min-height: calc(100vh - 59px); }
+/* ── Layout ── */
+.main { display:flex; height:calc(100vh - 57px); }
+.sidebar {
+  width:330px; min-width:330px; border-right:1px solid var(--border);
+  background:var(--surface); overflow-y:auto;
+}
+.content { flex:1; overflow-y:auto; padding:28px 32px; background:var(--bg); }
+.content-inner { max-width:900px; display:flex; flex-direction:column; gap:20px; }
 
-  /* Sidebar */
-  .sidebar {
-    width: 340px; min-width: 340px; border-right: 1px solid var(--border);
-    background: var(--surface); overflow-y: auto; position: sticky; top: 59px;
-    height: calc(100vh - 59px);
-  }
-  .panel-label {
-    font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--muted); padding: 16px 20px 8px; border-bottom: 1px solid var(--border);
-  }
-  .form-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-  .field label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
-  .field input, .field select, .field textarea {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text); font-family: var(--font); font-size: 13px;
-    padding: 9px 12px; outline: none; transition: all 0.15s;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-  .field input::placeholder, .field textarea::placeholder { color: var(--muted2); }
-  .field select option { background: var(--surface); }
-  .field textarea { resize: vertical; min-height: 68px; line-height: 1.5; }
-  .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
-  .tag {
-    font-size: 11px; padding: 4px 10px; border-radius: 20px;
-    border: 1px solid var(--border); color: var(--muted);
-    cursor: pointer; transition: all 0.15s; font-weight: 500; user-select: none;
-  }
-  .tag:hover { border-color: var(--accent); color: var(--accent); }
-  .tag.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
-  .btn-analyze {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 12px; border-radius: 8px; border: none;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff;
-    font-family: var(--font); font-size: 13px; font-weight: 600;
-    cursor: pointer; transition: all 0.15s; margin-top: 4px;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.25);
-  }
-  .btn-analyze:hover { box-shadow: 0 4px 12px rgba(37,99,235,0.35); transform: translateY(-1px); }
-  .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-  .spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ── Sidebar form ── */
+.panel-lbl {
+  font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); padding:14px 18px 8px; border-bottom:1px solid var(--border);
+}
+.form-body { padding:18px; display:flex; flex-direction:column; gap:13px; }
+.field label { display:block; font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+.field input, .field select, .field textarea {
+  width:100%; background:var(--surface2); border:1px solid var(--border);
+  border-radius:7px; color:var(--text); font-family:var(--font); font-size:13px;
+  padding:8px 12px; outline:none; transition:border-color .15s,box-shadow .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus {
+  border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.1);
+}
+.field input::placeholder,.field textarea::placeholder { color:var(--muted2); }
+.field select option { background:var(--surface); }
+.field textarea { resize:vertical; min-height:64px; line-height:1.5; }
 
-  .history-section { border-top: 1px solid var(--border); padding: 12px 20px 16px; }
-  .history-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  .hist-item { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
-  .hist-item:hover { background: var(--surface2); }
-  .hist-item:last-child { border-bottom: none; }
-  .hist-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .hist-name { font-size: 12px; font-weight: 500; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .hist-time { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+.tag-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:4px; }
+.tag {
+  font-size:11px; padding:4px 10px; border-radius:20px;
+  border:1px solid var(--border); color:var(--muted);
+  cursor:pointer; transition:all .15s; font-weight:500; user-select:none;
+}
+.tag:hover { border-color:var(--accent); color:var(--accent); }
+.tag.active { background:var(--accent-l); border-color:var(--accent); color:var(--accent); }
 
-  /* Content */
-  .content { flex: 1; padding: 28px 32px; background: var(--bg); overflow-y: auto; }
-  .content-inner { display: flex; flex-direction: column; gap: 20px; max-width: 920px; }
+.btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; padding:11px; border-radius:8px; border:none;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff;
+  font-family:var(--font); font-size:13px; font-weight:600;
+  cursor:pointer; transition:all .15s; margin-top:2px;
+  box-shadow:0 2px 8px rgba(37,99,235,.25);
+}
+.btn:hover:not(:disabled) { box-shadow:0 4px 14px rgba(37,99,235,.38); transform:translateY(-1px); }
+.btn:disabled { opacity:.45; cursor:not-allowed; transform:none; box-shadow:none; }
 
-  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: var(--muted); text-align: center; padding: 100px 40px; }
-  .empty-logo {
-    width: 72px; height: 72px; border-radius: 18px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 32px; font-weight: 700;
-    box-shadow: 0 4px 16px rgba(37,99,235,0.25);
-  }
-  .empty-state h2 { font-size: 18px; font-weight: 600; color: var(--text); }
-  .empty-state p { font-size: 13px; line-height: 1.65; max-width: 380px; color: var(--muted); }
-  .empty-examples { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
-  .ex-chip {
-    font-size: 11px; font-family: var(--mono); padding: 5px 12px;
-    border: 1px solid var(--border); border-radius: 20px;
-    color: var(--muted); cursor: pointer; transition: all 0.15s; font-weight: 500;
-  }
-  .ex-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.spinner {
+  width:13px; height:13px; border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
 
-  /* Result */
-  .result-header { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
-  .app-identity { flex: 1; }
-  .app-name { font-size: 24px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
-  .app-meta { font-size: 12px; color: var(--muted); font-family: var(--mono); display: flex; gap: 16px; flex-wrap: wrap; }
+/* History */
+.hist-section { border-top:1px solid var(--border); padding:12px 18px 14px; }
+.hist-lbl { font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+.hist-item {
+  display:flex; align-items:center; gap:8px; padding:6px 4px;
+  border-bottom:1px solid var(--border); cursor:pointer; border-radius:4px;
+  transition:background .1s;
+}
+.hist-item:hover { background:var(--surface2); }
+.hist-item:last-child { border-bottom:none; }
+.hist-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.hist-name { font-size:12px; font-weight:500; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hist-time { font-size:10px; color:var(--muted); font-family:var(--mono); }
+.hist-badge {
+  font-size:9px; font-weight:600; padding:1px 7px; border-radius:20px;
+  text-transform:uppercase; letter-spacing:.04em;
+}
+.hist-badge.approve { background:var(--green-bg); color:var(--green); }
+.hist-badge.deny    { background:var(--red-bg);   color:var(--red);   }
+.hist-badge.conditional { background:var(--amber-bg); color:var(--amber); }
 
-  .verdict-badge { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 12px; border: 2px solid; max-width: 300px; }
-  .verdict-badge.approve { background: var(--green-bg); border-color: var(--green-border); }
-  .verdict-badge.deny { background: var(--red-bg); border-color: var(--red-border); }
-  .verdict-badge.conditional { background: var(--amber-bg); border-color: var(--amber-border); }
-  .verdict-icon { font-size: 28px; flex-shrink: 0; }
-  .verdict-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; }
-  .verdict-text { font-size: 18px; font-weight: 700; }
-  .verdict-badge.approve .verdict-text { color: var(--green); }
-  .verdict-badge.deny .verdict-text { color: var(--red); }
-  .verdict-badge.conditional .verdict-text { color: var(--amber); }
-  .verdict-reason { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+/* ── Empty state ── */
+.empty {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; padding:100px 40px; text-align:center; color:var(--muted);
+}
+.empty-logo {
+  width:74px; height:74px; border-radius:20px;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  display:flex; align-items:center; justify-content:center;
+  font-size:34px; box-shadow:0 4px 18px rgba(37,99,235,.25);
+}
+.empty h2 { font-size:19px; font-weight:700; color:var(--text); }
+.empty p  { font-size:13px; line-height:1.7; max-width:380px; }
+.chips { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; }
+.chip {
+  font-size:11px; font-family:var(--mono); padding:5px 13px;
+  border:1px solid var(--border); border-radius:20px;
+  color:var(--muted); cursor:pointer; transition:all .15s; font-weight:500;
+}
+.chip:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-l); }
 
-  .score-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
-  .score-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
-  .score-val { font-size: 26px; font-weight: 700; font-family: var(--mono); }
-  .score-val.sm { font-size: 13px; padding-top: 5px; line-height: 1.3; font-weight: 600; }
-  .score-sub { font-size: 11px; color: var(--muted2); margin-top: 2px; }
-  .c-critical { color: var(--red); } .c-high { color: var(--amber); }
-  .c-medium { color: #ea580c; } .c-low { color: var(--green); } .c-info { color: var(--accent); }
+/* ── Result sections ── */
+.result-header { display:flex; align-items:flex-start; gap:20px; flex-wrap:wrap; }
+.app-name   { font-size:24px; font-weight:700; margin-bottom:4px; }
+.app-meta   { font-size:12px; color:var(--muted); font-family:var(--mono); display:flex; gap:14px; flex-wrap:wrap; margin-top:2px; }
+.app-meta span::before { content:"·"; margin-right:14px; }
+.app-meta span:first-child::before { content:""; margin-right:0; }
 
-  /* Section cards */
-  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; display: block; box-shadow: var(--shadow); }
-  .section-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
-  .section-ico { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-  .ico-blue { background: var(--accent-light); color: var(--accent); }
-  .ico-red { background: var(--red-bg); color: var(--red); }
-  .ico-green { background: var(--green-bg); color: var(--green); }
-  .ico-amber { background: var(--amber-bg); color: var(--amber); }
-  .ico-purple { background: #ede9fe; color: var(--purple); }
-  .section-title { font-size: 13px; font-weight: 600; color: var(--text); }
-  .section-body { padding: 18px; display: block; }
+.vbadge { display:flex; align-items:center; gap:12px; padding:15px 20px; border-radius:12px; border:2px solid; }
+.vbadge.approve { background:var(--green-bg); border-color:var(--green-b); }
+.vbadge.deny    { background:var(--red-bg);   border-color:var(--red-b);   }
+.vbadge.conditional { background:var(--amber-bg); border-color:var(--amber-b); }
+.vbadge-icon  { font-size:28px; flex-shrink:0; }
+.vbadge-lbl   { font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); font-weight:600; }
+.vbadge-text  { font-size:18px; font-weight:700; }
+.vbadge.approve .vbadge-text { color:var(--green); }
+.vbadge.deny    .vbadge-text { color:var(--red);   }
+.vbadge.conditional .vbadge-text { color:var(--amber); }
+.vbadge-reason { font-size:11px; color:var(--muted); margin-top:4px; line-height:1.45; max-width:240px; }
 
-  .prose { font-size: 13px; line-height: 1.8; color: #4b5563; display: block; word-wrap: break-word; }
+/* Score row */
+.score-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.scard { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:15px; box-shadow:var(--sh); }
+.scard-lbl  { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:8px; font-weight:600; }
+.scard-val  { font-size:26px; font-weight:700; font-family:var(--mono); }
+.scard-val.sm { font-size:13px; padding-top:4px; font-weight:600; line-height:1.35; }
+.scard-sub  { font-size:11px; color:var(--muted2); margin-top:2px; }
+.c-critical { color:var(--red);  } .c-high { color:var(--amber); }
+.c-medium   { color:#ea580c;    } .c-low  { color:var(--green); } .c-info { color:var(--accent); }
 
-  .vuln-list { display: flex; flex-direction: column; gap: 10px; }
-  .vuln-item { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; background: var(--surface2); border-radius: 10px; border-left: 3px solid; }
-  .vuln-item.critical { border-color: var(--red); } .vuln-item.high { border-color: var(--amber); }
-  .vuln-item.medium { border-color: #ea580c; } .vuln-item.low { border-color: var(--green); }
-  .vuln-cve { font-family: var(--mono); font-size: 11px; color: var(--accent); white-space: nowrap; padding-top: 2px; min-width: 120px; font-weight: 500; }
-  .vuln-detail { flex: 1; min-width: 0; }
-  .vuln-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
-  .vuln-desc { font-size: 12px; color: var(--muted); line-height: 1.6; word-wrap: break-word; }
-  .vuln-sev { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; flex-shrink: 0; }
-  .vuln-sev.critical { background: var(--red-bg); color: var(--red); }
-  .vuln-sev.high { background: var(--amber-bg); color: var(--amber); }
-  .vuln-sev.medium { background: #ffedd5; color: #ea580c; }
-  .vuln-sev.low { background: var(--green-bg); color: var(--green); }
+/* Section cards */
+.scard-section { background:var(--surface); border:1px solid var(--border); border-radius:12px; display:block; box-shadow:var(--sh); overflow:hidden; }
+.scard-head    { display:flex; align-items:center; gap:10px; padding:13px 18px; border-bottom:1px solid var(--border); }
+.scard-ico     { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+.ico-blue   { background:var(--accent-l);  color:var(--accent); }
+.ico-red    { background:var(--red-bg);    color:var(--red);    }
+.ico-green  { background:var(--green-bg);  color:var(--green);  }
+.ico-amber  { background:var(--amber-bg);  color:var(--amber);  }
+.ico-purple { background:var(--purple-bg); color:var(--purple); }
+.scard-title { font-size:13px; font-weight:600; }
+.scard-body  { padding:18px; display:block; }
 
-  .cond-list { display: flex; flex-direction: column; gap: 8px; }
-  .cond-item { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; background: var(--surface2); border-radius: 8px; font-size: 13px; color: #4b5563; line-height: 1.55; }
-  .cond-num { font-family: var(--mono); font-size: 11px; color: var(--accent); min-width: 18px; padding-top: 1px; flex-shrink: 0; font-weight: 600; }
+.prose { font-size:13px; line-height:1.8; color:#4b5563; word-wrap:break-word; }
 
-  .risk-bars { display: flex; flex-direction: column; gap: 14px; }
-  .rbar-row { display: flex; flex-direction: column; gap: 5px; }
-  .rbar-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-weight: 500; }
-  .rbar-track { height: 7px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
-  .rbar-fill { height: 100%; border-radius: 99px; transition: width 0.9s cubic-bezier(0.4,0,0.2,1); }
+/* CVE list */
+.vuln-list { display:flex; flex-direction:column; gap:10px; }
+.vuln-item {
+  display:flex; gap:14px; align-items:flex-start;
+  padding:12px 14px; background:var(--surface2);
+  border-radius:9px; border-left:3px solid;
+}
+.vuln-item.critical { border-color:var(--red);  }
+.vuln-item.high     { border-color:var(--amber); }
+.vuln-item.medium   { border-color:#ea580c;     }
+.vuln-item.low      { border-color:var(--green); }
+.vuln-cve   { font-family:var(--mono); font-size:11px; color:var(--accent); white-space:nowrap; padding-top:2px; min-width:118px; font-weight:500; }
+.vuln-detail { flex:1; min-width:0; }
+.vuln-ttl   { font-size:13px; font-weight:600; margin-bottom:3px; }
+.vuln-desc  { font-size:12px; color:var(--muted); line-height:1.55; word-wrap:break-word; }
+.vuln-meta  { display:flex; gap:10px; margin-top:5px; flex-wrap:wrap; }
+.vmeta-item { font-size:10px; color:var(--muted2); font-family:var(--mono); display:flex; align-items:center; gap:3px; }
+.epss-pill  { font-size:10px; padding:1px 7px; border-radius:20px; font-weight:600; }
+.epss-pill.green  { background:var(--green-bg); color:var(--green); }
+.epss-pill.yellow { background:var(--amber-bg); color:var(--amber); }
+.epss-pill.red    { background:var(--red-bg);   color:var(--red);   }
+.cve-link {
+  font-size:10px; color:var(--accent); text-decoration:none;
+  background:var(--accent-l); padding:1px 6px; border-radius:4px;
+  font-family:var(--mono); font-weight:600; margin-left:4px;
+}
+.cve-link:hover { background:var(--accent); color:#fff; }
+.sev-badge {
+  font-size:10px; font-weight:600; padding:3px 9px; border-radius:20px;
+  text-transform:uppercase; white-space:nowrap; flex-shrink:0;
+}
+.sev-badge.critical { background:var(--red-bg);   color:var(--red);   }
+.sev-badge.high     { background:var(--amber-bg);  color:var(--amber); }
+.sev-badge.medium   { background:#ffedd5;          color:#ea580c;      }
+.sev-badge.low      { background:var(--green-bg);  color:var(--green); }
+.new-badge { font-size:9px; padding:1px 6px; background:var(--purple-bg); color:var(--purple); border-radius:20px; font-weight:700; margin-left:4px; }
 
-  .loading-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 80px 0; color: var(--muted); }
-  .loading-ring { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  .loading-steps { display: flex; flex-direction: column; gap: 8px; }
-  .lstep { display: flex; align-items: center; gap: 10px; font-size: 12px; }
-  .lstep-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
-  .lstep-dot.active { background: var(--accent); box-shadow: 0 0 6px rgba(37,99,235,0.4); }
-  .lstep-dot.done { background: var(--green); }
+/* KEV alert */
+.kev-alert {
+  background:linear-gradient(135deg,#fee2e2,#fecaca);
+  border:2px solid var(--red); border-radius:12px;
+  padding:16px 20px; display:flex; gap:14px; align-items:flex-start;
+  box-shadow:0 2px 8px rgba(220,38,38,.15);
+}
+.kev-icon { font-size:28px; flex-shrink:0; }
+.kev-title { font-size:14px; font-weight:700; color:var(--red); margin-bottom:4px; }
+.kev-sub   { font-size:12px; color:#7f1d1d; margin-bottom:10px; line-height:1.5; }
+.kev-items { display:flex; flex-direction:column; gap:8px; }
+.kev-item  {
+  background:rgba(255,255,255,.7); padding:10px 13px;
+  border-radius:8px; font-size:12px; color:#7f1d1d; line-height:1.5;
+}
+.kev-cve   { font-family:var(--mono); font-weight:600; color:var(--red); }
+.ransomware-badge { font-size:9px; padding:2px 7px; background:var(--red); color:#fff; border-radius:20px; margin-left:6px; font-weight:700; }
 
-  .error-box { background: var(--red-bg); border: 1px solid var(--red-border); border-radius: 10px; padding: 18px; font-size: 13px; color: var(--red); line-height: 1.7; }
-  .error-box code { font-family: var(--mono); font-size: 12px; background: rgba(220,38,38,0.08); padding: 2px 6px; border-radius: 4px; }
+/* Info blocks */
+.iblock { border-radius:8px; padding:12px 14px; margin-bottom:8px; }
+.iblock:last-child { margin-bottom:0; }
+.iblock-lbl { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px; }
+.iblock-txt { font-size:13px; color:#4b5563; line-height:1.6; word-wrap:break-word; }
+.iblock          { background:var(--surface2); }
+.iblock.warn     { background:var(--amber-bg); border-left:3px solid var(--amber); }
+.iblock.success  { background:var(--green-bg); border-left:3px solid var(--green); }
+.iblock.danger   { background:var(--red-bg);   border-left:3px solid var(--red);   }
+.iblock.warn  .iblock-lbl { color:var(--amber); }
+.iblock.success .iblock-lbl { color:var(--green); }
+.iblock.danger .iblock-lbl { color:var(--red); }
 
-  /* Live data sources */
-  .data-sources { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-  .src-badge {
-    font-size: 9px; font-family: var(--mono); padding: 2px 8px;
-    background: var(--accent-light); color: var(--accent);
-    border-radius: 20px; font-weight: 600; letter-spacing: 0.04em;
-  }
+/* Conditions */
+.cond-list { display:flex; flex-direction:column; gap:8px; }
+.cond-item {
+  display:flex; gap:10px; align-items:flex-start;
+  padding:10px 13px; background:var(--surface2);
+  border-radius:8px; font-size:13px; color:#4b5563; line-height:1.55;
+}
+.cond-num { font-family:var(--mono); font-size:11px; color:var(--accent); min-width:18px; padding-top:1px; flex-shrink:0; font-weight:600; }
 
-  /* KEV alert */
-  .kev-alert {
-    background: linear-gradient(135deg, #fee2e2, #fecaca);
-    border: 2px solid var(--red);
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex; gap: 14px; align-items: flex-start;
-  }
-  .kev-icon { font-size: 28px; flex-shrink: 0; }
-  .kev-content { flex: 1; }
-  .kev-title { font-size: 14px; font-weight: 700; color: var(--red); margin-bottom: 4px; }
-  .kev-subtitle { font-size: 12px; color: #7f1d1d; margin-bottom: 10px; line-height: 1.5; }
-  .kev-items { display: flex; flex-direction: column; gap: 8px; }
-  .kev-item {
-    background: rgba(255,255,255,0.7);
-    padding: 10px 12px; border-radius: 8px;
-    font-size: 12px; color: #7f1d1d; line-height: 1.5;
-  }
-  .kev-cve { font-family: var(--mono); font-weight: 600; color: var(--red); }
-  .kev-ransomware {
-    display: inline-block; font-size: 10px; padding: 2px 8px;
-    background: var(--red); color: white;
-    border-radius: 20px; margin-left: 6px; font-weight: 600;
-  }
+/* Risk bars */
+.risk-bars { display:flex; flex-direction:column; gap:14px; }
+.rbar-row  { display:flex; flex-direction:column; gap:5px; }
+.rbar-head { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); font-weight:500; }
+.rbar-track { height:7px; background:var(--surface2); border-radius:99px; overflow:hidden; }
+.rbar-fill  { height:100%; border-radius:99px; transition:width 1s cubic-bezier(.4,0,.2,1); }
 
-  /* Malware/Download blocks */
-  .info-block { background: var(--surface2); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
-  .info-block:last-child { margin-bottom: 0; }
-  .info-block-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
-  .info-block-content { font-size: 13px; color: #4b5563; line-height: 1.6; word-wrap: break-word; }
-  .info-block.warn { background: var(--amber-bg); border-left: 3px solid var(--amber); }
-  .info-block.warn .info-block-label { color: var(--amber); }
-  .info-block.success { background: var(--green-bg); border-left: 3px solid var(--green); }
-  .info-block.success .info-block-label { color: var(--green); }
-  .info-block.danger { background: var(--red-bg); border-left: 3px solid var(--red); }
-  .info-block.danger .info-block-label { color: var(--red); }
+/* Loading */
+.loading {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:18px; padding:100px 0; color:var(--muted);
+}
+.loading-ring {
+  width:44px; height:44px; border:3px solid var(--border);
+  border-top-color:var(--accent); border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+.loading-steps { display:flex; flex-direction:column; gap:10px; }
+.lstep { display:flex; align-items:center; gap:10px; font-size:12px; transition:color .3s; }
+.lstep-dot { width:7px; height:7px; border-radius:50%; background:var(--border2); flex-shrink:0; transition:background .3s; }
+.lstep-dot.active { background:var(--accent); box-shadow:0 0 7px rgba(37,99,235,.45); }
+.lstep-dot.done   { background:var(--green); }
 
-  /* CVE detail with EPSS */
-  .vuln-meta { display: flex; gap: 10px; font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
-  .vuln-meta-item { display: flex; align-items: center; gap: 4px; }
-  .epss-pill {
-    display: inline-block; font-size: 10px; padding: 1px 7px;
-    background: var(--accent-light); color: var(--accent);
-    border-radius: 20px; font-weight: 600;
-  }
-  .epss-pill.high { background: var(--red-bg); color: var(--red); }
-  .epss-pill.med { background: var(--amber-bg); color: var(--amber); }
+/* Error */
+.error-box {
+  background:var(--red-bg); border:1px solid var(--red-b);
+  border-radius:10px; padding:20px; font-size:13px; color:var(--red); line-height:1.7;
+}
 
-  .cve-link {
-    font-size: 10px; color: var(--accent); text-decoration: none;
-    font-family: var(--mono); padding: 1px 6px;
-    background: var(--accent-light); border-radius: 4px;
-    margin-left: 4px; font-weight: 600;
-  }
-  .cve-link:hover { background: var(--accent); color: white; }
+/* Footer */
+.data-footer { font-size:11px; color:var(--muted2); text-align:center; padding:6px 0; font-family:var(--mono); }
+
+/* Tooltip */
+[title] { cursor:help; }
+
+/* ── Responsive ── */
+@media(max-width:768px) {
+  .main { flex-direction:column; height:auto; }
+  .sidebar { width:100%; height:auto; position:relative; top:0; }
+  .content { padding:16px; }
+  .score-row { grid-template-columns:repeat(2,1fr); }
+  .result-header { flex-direction:column; }
+  .vbadge { max-width:100%; }
+}
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="logo-icon">🛡</div>
-  <div class="topbar-brand">
-    <span class="topbar-title">Software Police</span>
-    <span class="topbar-sub">AI Security Review · Powered by live threat intelligence</span>
+  <div class="logo">🛡</div>
+  <div>
+    <div class="brand-title">Software Police</div>
+    <div class="brand-sub">AI Security Review — Live Threat Intelligence</div>
   </div>
-  <div class="data-sources">
-    <span class="src-badge">NVD</span>
-    <span class="src-badge">CISA KEV</span>
-    <span class="src-badge">EPSS</span>
-    <span class="src-badge">CLAUDE AI</span>
+  <div class="src-pills">
+    <span class="src-pill live">● LIVE</span>
+    <span class="src-pill">NVD</span>
+    <span class="src-pill">CISA KEV</span>
+    <span class="src-pill">EPSS</span>
+    <span class="src-pill">Claude AI</span>
   </div>
 </div>
+
 <div class="main">
+  <!-- Sidebar -->
   <div class="sidebar">
-    <div class="panel-label">Application Review Request</div>
+    <div class="panel-lbl">Application Review Request</div>
     <div class="form-body">
       <div class="field">
-        <label>Application / Software Name</label>
-        <input type="text" id="appName" placeholder="e.g. WireShark, Notion, TeamViewer"/>
+        <label>Application / Software Name *</label>
+        <input id="appName" type="text" placeholder="e.g. WireShark, Zoom, FileZilla" autocomplete="off"/>
       </div>
       <div class="field">
-        <label>Version (optional)</label>
-        <input type="text" id="appVersion" placeholder="e.g. 4.2.1 or latest"/>
+        <label>Version <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input id="appVersion" type="text" placeholder="e.g. 4.2.1 or latest"/>
       </div>
       <div class="field">
         <label>Vendor / Publisher</label>
-        <input type="text" id="appVendor" placeholder="e.g. Wireshark Foundation"/>
+        <input id="appVendor" type="text" placeholder="e.g. Wireshark Foundation"/>
       </div>
       <div class="field">
         <label>Deployment Environment</label>
@@ -305,7 +353,7 @@
       </div>
       <div class="field">
         <label>Business Justification</label>
-        <textarea id="appJustification" placeholder="Why is this application needed? What problem does it solve?"></textarea>
+        <textarea id="appJustification" placeholder="What problem does this software solve?"></textarea>
       </div>
       <div class="field">
         <label>Data Sensitivity</label>
@@ -322,34 +370,35 @@
         <div class="tag-row" id="permTags">
           <span class="tag" data-val="Network">Network</span>
           <span class="tag" data-val="Admin">Admin</span>
-          <span class="tag" data-val="FileSystem">File system</span>
+          <span class="tag" data-val="File system">File system</span>
           <span class="tag" data-val="Browser">Browser</span>
           <span class="tag" data-val="Camera/Mic">Camera/Mic</span>
           <span class="tag" data-val="Internet">Internet</span>
         </div>
       </div>
-      <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">
-        🔍 Analyze Application Risk
-      </button>
+      <button class="btn" id="analyzeBtn" onclick="runAnalysis()">🔍 Analyze Application Risk</button>
     </div>
-    <div class="history-section" id="histSection" style="display:none">
-      <div class="history-label">Previous Reviews</div>
+    <div id="histSection" style="display:none" class="hist-section">
+      <div class="hist-lbl">Previous Reviews</div>
       <div id="histList"></div>
     </div>
   </div>
 
+  <!-- Content -->
   <div class="content" id="contentPane">
-    <div class="empty-state">
+    <div class="empty">
       <div class="empty-logo">🛡</div>
       <h2>Software Police</h2>
-      <p>Submit any application for a comprehensive AI-powered security review. Get vulnerability data, threat intelligence, risk scoring, and a clear Approve / Deny / Conditional recommendation.</p>
-      <div class="empty-examples">
-        <span class="ex-chip" onclick="quickFill('WireShark','Wireshark Foundation')">WireShark</span>
-        <span class="ex-chip" onclick="quickFill('TeamViewer','TeamViewer GmbH')">TeamViewer</span>
-        <span class="ex-chip" onclick="quickFill('Notion','Notion Labs')">Notion</span>
-        <span class="ex-chip" onclick="quickFill('FileZilla','Tim Kosse')">FileZilla</span>
-        <span class="ex-chip" onclick="quickFill('Zoom','Zoom Video')">Zoom</span>
-        <span class="ex-chip" onclick="quickFill('Slack','Salesforce')">Slack</span>
+      <p>Get a comprehensive, AI-powered security review for any application — powered by live vulnerability data from NIST NVD, CISA KEV, and EPSS.</p>
+      <div class="chips">
+        <span class="chip" onclick="quickFill('WireShark','Wireshark Foundation')">WireShark</span>
+        <span class="chip" onclick="quickFill('TeamViewer','TeamViewer GmbH')">TeamViewer</span>
+        <span class="chip" onclick="quickFill('Putty','Simon Tatham')">PuTTY</span>
+        <span class="chip" onclick="quickFill('FileZilla','Tim Kosse')">FileZilla</span>
+        <span class="chip" onclick="quickFill('Zoom','Zoom Video Communications')">Zoom</span>
+        <span class="chip" onclick="quickFill('Slack','Salesforce')">Slack</span>
+        <span class="chip" onclick="quickFill('7-Zip','Igor Pavlov')">7-Zip</span>
+        <span class="chip" onclick="quickFill('Log4j','Apache Foundation')">Log4j</span>
       </div>
     </div>
   </div>
@@ -357,242 +406,261 @@
 
 <script>
 var reviews = [];
+document.querySelectorAll('.tag').forEach(function(t){t.addEventListener('click',function(){t.classList.toggle('active');});});
+document.getElementById('appName').addEventListener('keydown',function(e){if(e.key==='Enter')runAnalysis();});
 
-document.querySelectorAll('.tag').forEach(function(t) { t.addEventListener('click', function() { t.classList.toggle('active'); }); });
-
-function quickFill(name, vendor) {
-  document.getElementById('appName').value = name;
-  document.getElementById('appVendor').value = vendor;
+function quickFill(name,vendor){
+  document.getElementById('appName').value=name;
+  document.getElementById('appVendor').value=vendor;
+  document.getElementById('appName').focus();
 }
 
-function activeTags(id) {
-  return Array.from(document.querySelectorAll('#' + id + ' .tag.active')).map(function(t) { return t.dataset.val; });
-}
+function activeTags(id){return Array.from(document.querySelectorAll('#'+id+' .tag.active')).map(function(t){return t.dataset.val;});}
 
-function sevClass(v) {
-  if (typeof v === 'number') { if(v>=9)return'critical'; if(v>=7)return'high'; if(v>=4)return'medium'; return'low'; }
+function sevClass(v){
+  if(typeof v==='number'){if(v>=9)return'critical';if(v>=7)return'high';if(v>=4)return'medium';return'low';}
   return (v||'').toLowerCase();
 }
+function vc(v){return v==='APPROVE'?'approve':v==='DENY'?'deny':'conditional';}
+function vi(v){return v==='APPROVE'?'✅':v==='DENY'?'🚫':'⚠️';}
+function vcolor(v){return v==='APPROVE'?'#16a34a':v==='DENY'?'#dc2626':'#d97706';}
 
-function verdictC(v) { return v==='APPROVE'?'approve':v==='DENY'?'deny':'conditional'; }
-function verdictIcon(v) { return v==='APPROVE'?'✅':v==='DENY'?'🚫':'⚠️'; }
-function verdictColor(v) { return v==='APPROVE'?'#16a34a':v==='DENY'?'#dc2626':'#d97706'; }
-
-var stepInterval;
-
-function setLoading() {
-  var steps = ['Fetching CVEs from NIST NVD','Checking CISA KEV catalog','Calculating EPSS exploit scores','AI threat analysis & verdict'];
-  var cur = 0;
-  document.getElementById('contentPane').innerHTML =
-    '<div class="loading-overlay">' +
-      '<div class="loading-ring"></div>' +
-      '<div style="font-size:13px;font-family:var(--mono);color:var(--muted)">Analysing application security...</div>' +
-      '<div class="loading-steps" id="lsteps">' +
-        steps.map(function(s,i){
-          return '<div class="lstep" id="lstep' + i + '"><div class="lstep-dot ' + (i===0?'active':'') + '"></div><span style="color:' + (i===0?'var(--text)':'var(--muted)') + '">' + s + '</span></div>';
-        }).join('') +
-      '</div>' +
-    '</div>';
-  stepInterval = setInterval(function() {
-    var done = document.querySelector('.lstep-dot.active');
-    if (done) { done.classList.remove('active'); done.classList.add('done'); done.parentElement.querySelector('span').style.color='var(--green)'; }
+var stepTimer;
+function setLoading(){
+  var steps=['Fetching CVEs from NIST NVD','Checking CISA KEV catalog','Getting EPSS exploit scores','AI threat analysis &amp; verdict'];
+  document.getElementById('contentPane').innerHTML=
+    '<div class="loading">'+
+    '<div class="loading-ring"></div>'+
+    '<div style="font-size:13px;font-family:var(--mono);color:var(--muted)">Analysing security data...</div>'+
+    '<div class="loading-steps">'+
+    steps.map(function(s,i){return '<div class="lstep" id="ls'+i+'"><div class="lstep-dot'+(i===0?' active':'')+'"></div><span style="color:'+(i===0?'var(--text)':'var(--muted)')+'">'+s+'</span></div>';}).join('')+
+    '</div></div>';
+  var cur=0;
+  stepTimer=setInterval(function(){
+    var d=document.querySelector('.lstep-dot.active');
+    if(d){d.classList.remove('active');d.classList.add('done');d.parentElement.querySelector('span').style.color='var(--green)';}
     cur++;
-    var next = document.getElementById('lstep' + cur);
-    if (next) { next.querySelector('.lstep-dot').classList.add('active'); next.querySelector('span').style.color='var(--text)'; }
-  }, 3000);
+    var n=document.getElementById('ls'+cur);
+    if(n){n.querySelector('.lstep-dot').classList.add('active');n.querySelector('span').style.color='var(--text)';}
+  },3500);
 }
 
-async function runAnalysis() {
-  var appName = document.getElementById('appName').value.trim();
-  if (!appName) { alert('Please enter an application name.'); return; }
-  var payload = {
-    app_name: appName,
-    app_version: document.getElementById('appVersion').value.trim(),
-    app_vendor: document.getElementById('appVendor').value.trim(),
-    app_env: document.getElementById('appEnv').value,
-    justification: document.getElementById('appJustification').value.trim(),
-    data_class: activeTags('dataTags'),
-    permissions: activeTags('permTags'),
+async function runAnalysis(){
+  var name=document.getElementById('appName').value.trim();
+  if(!name){document.getElementById('appName').focus();document.getElementById('appName').style.borderColor='var(--red)';setTimeout(function(){document.getElementById('appName').style.borderColor='';},1500);return;}
+  var payload={
+    app_name:name,
+    app_version:document.getElementById('appVersion').value.trim(),
+    app_vendor:document.getElementById('appVendor').value.trim(),
+    app_env:document.getElementById('appEnv').value,
+    justification:document.getElementById('appJustification').value.trim(),
+    data_class:activeTags('dataTags'),
+    permissions:activeTags('permTags'),
   };
-  var btn = document.getElementById('analyzeBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Analyzing...';
+  var btn=document.getElementById('analyzeBtn');
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Analyzing…';
   setLoading();
-  try {
-    var res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    clearInterval(stepInterval);
-    if (!res.ok) { var err = await res.json().catch(function() { return { detail: res.statusText }; }); throw new Error(err.detail || 'HTTP ' + res.status); }
-    var result = await res.json();
-    renderResult(result, payload);
-    reviews.unshift({ app_name: payload.app_name, app_vendor: payload.app_vendor, app_version: payload.app_version, app_env: payload.app_env, data_class: payload.data_class, verdict: result.verdict, time: new Date().toLocaleTimeString(), result: result });
+  try{
+    var res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    clearInterval(stepTimer);
+    if(!res.ok){var e=await res.json().catch(function(){return{detail:res.statusText};});throw new Error(e.detail||'HTTP '+res.status);}
+    var result=await res.json();
+    renderResult(result,payload);
+    reviews.unshift({...payload,verdict:result.verdict,time:new Date().toLocaleTimeString(),result:result});
     renderHistory();
-  } catch (e) {
-    clearInterval(stepInterval);
-    document.getElementById('contentPane').innerHTML = '<div class="error-box"><strong>Analysis failed</strong><br><br>' + e.message + '</div>';
+  }catch(e){
+    clearInterval(stepTimer);
+    document.getElementById('contentPane').innerHTML='<div class="error-box"><strong>Analysis failed</strong><br><br>'+escHtml(e.message)+'<br><br>Please check your connection and try again. If the error persists, the server may be restarting.</div>';
   }
-  btn.disabled = false;
-  btn.innerHTML = '🔍 Analyze Application Risk';
+  btn.disabled=false;btn.innerHTML='🔍 Analyze Application Risk';
 }
 
-function renderHistory() {
-  document.getElementById('histSection').style.display = 'block';
-  document.getElementById('histList').innerHTML = reviews.slice(0, 8).map(function(h, i) {
-    return '<div class="hist-item" onclick="showReview(' + i + ')"><div class="hist-dot" style="background:' + verdictColor(h.verdict) + '"></div><div class="hist-name">' + h.app_name + '</div><div class="hist-time">' + h.time + '</div></div>';
+function escHtml(s){var d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
+
+function renderHistory(){
+  document.getElementById('histSection').style.display='block';
+  document.getElementById('histList').innerHTML=reviews.slice(0,8).map(function(h,i){
+    var vcls=vc(h.verdict);
+    return '<div class="hist-item" onclick="showReview('+i+')">'+
+      '<div class="hist-dot" style="background:'+vcolor(h.verdict)+'"></div>'+
+      '<div class="hist-name">'+escHtml(h.app_name)+'</div>'+
+      '<span class="hist-badge '+vcls+'">'+h.verdict+'</span>'+
+      '<div class="hist-time">'+h.time+'</div>'+
+    '</div>';
   }).join('');
 }
 
-function showReview(i) { renderResult(reviews[i].result, reviews[i]); }
+function showReview(i){renderResult(reviews[i].result,reviews[i]);}
 
-function renderResult(r, ctx) {
-  var vc = verdictC(r.verdict);
-  var scoreC = r.risk_score>=75?'critical':r.risk_score>=50?'high':r.risk_score>=25?'medium':'low';
-  var cvssC = sevClass(r.cvss_estimate||0);
-  var expC = (r.exploit_maturity==='Active Exploitation'||r.exploit_maturity==='Weaponized')?'critical':r.exploit_maturity==='Proof of Concept'?'high':'low';
+function isNew(dateStr){
+  if(!dateStr)return false;
+  var d=new Date(dateStr);
+  var cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-6);
+  return d>cutoff;
+}
 
-  var liveData = r._live_data || {};
-  var latestCves = liveData.latest_cves || [];
-  var kevEntries = liveData.kev_entries || [];
-  var epssData = liveData.epss_data || {};
+function renderResult(r,ctx){
+  var vcls=vc(r.verdict);
+  var scoreC=r.risk_score>=75?'critical':r.risk_score>=50?'high':r.risk_score>=25?'medium':'low';
+  var cvssC=sevClass(r.cvss_estimate||0);
+  var expC=(r.exploit_maturity==='Active Exploitation'||r.exploit_maturity==='Weaponized')?'critical':r.exploit_maturity==='Proof of Concept'?'high':'low';
 
-  // Build CVE list - prefer live NVD data, fall back to AI-generated
-  var vulnsHtml = '';
-  var vulnsToShow = latestCves.length > 0 ? latestCves : (r.known_vulnerabilities || []);
-  if (vulnsToShow.length > 0) {
-    for (var i = 0; i < vulnsToShow.length; i++) {
-      var v = vulnsToShow[i];
-      var sev = (v.severity || 'medium').toLowerCase();
-      var cveId = v.cve_id || 'N/A';
-      var epss = epssData[cveId] || {};
-      var epssScore = epss.epss_score || v.epss_score || 0;
-      var epssClass = epssScore >= 50 ? 'high' : epssScore >= 10 ? 'med' : '';
-      var desc = v.description || v.title || '';
-      var nvdLink = v.nvd_url ? '<a href="' + v.nvd_url + '" target="_blank" class="cve-link">NVD ↗</a>' : '';
+  var ld=r._live_data||{};
+  var liveCves=ld.latest_cves||[];
+  var kevEntries=ld.kev_entries||[];
+  var epssData=ld.epss_data||{};
 
-      vulnsHtml += '<div class="vuln-item ' + sev + '">' +
-        '<div class="vuln-cve">' + cveId + nvdLink + '</div>' +
-        '<div class="vuln-detail">' +
-          '<div class="vuln-title">' + (v.title || v.vulnerability_name || 'Vulnerability') + '</div>' +
-          '<div class="vuln-desc">' + desc + '</div>' +
-          '<div class="vuln-meta">' +
-            (v.published ? '<span class="vuln-meta-item">📅 ' + v.published + '</span>' : '') +
-            (epssScore > 0 ? '<span class="vuln-meta-item">EPSS: <span class="epss-pill ' + epssClass + '">' + epssScore + '%</span></span>' : '') +
-          '</div>' +
-        '</div>' +
-        '<div class="vuln-sev ' + sev + '">' + (v.severity || 'MEDIUM') + ' ' + (v.cvss_score?Number(v.cvss_score).toFixed(1):'') + '</div>' +
+  // ── CVE list (newest first, already sorted server-side) ──
+  var cveHtml='';
+  var cves=liveCves.length>0?liveCves:(r.known_vulnerabilities||[]);
+  if(cves.length>0){
+    for(var i=0;i<cves.length;i++){
+      var v=cves[i];
+      var sev=(v.severity||'medium').toLowerCase();
+      var cid=v.cve_id||'N/A';
+      var ep=epssData[cid]||{};
+      var epssScore=ep.epss_score||v.epss_score||0;
+      var epssClass=epssScore>=50?'red':epssScore>=10?'yellow':'green';
+      var newBadge=isNew(v.published)?'<span class="new-badge">NEW</span>':'';
+      var nvdLink=v.nvd_url?'<a href="'+v.nvd_url+'" target="_blank" rel="noopener" class="cve-link">NVD ↗</a>':'';
+      var desc=escHtml(v.description||v.title||'');
+      cveHtml+='<div class="vuln-item '+sev+'">'+
+        '<div class="vuln-cve">'+escHtml(cid)+nvdLink+'</div>'+
+        '<div class="vuln-detail">'+
+          '<div class="vuln-ttl">'+escHtml(v.title||v.vulnerability_name||'Vulnerability')+newBadge+'</div>'+
+          '<div class="vuln-desc">'+desc+'</div>'+
+          '<div class="vuln-meta">'+
+            (v.published?'<span class="vmeta-item">📅 '+escHtml(v.published)+'</span>':'')+
+            (epssScore>0?'<span class="vmeta-item">Exploit prob: <span class="epss-pill '+epssClass+'" title="EPSS: probability this CVE is exploited in next 30 days">'+epssScore+'%</span></span>':'')+
+            (v.actively_exploited?'<span class="vmeta-item" style="color:var(--red);font-weight:600">🔴 Actively exploited</span>':'')+
+          '</div>'+
+        '</div>'+
+        '<div class="sev-badge '+sev+'">'+escHtml(v.severity||'MEDIUM')+' '+(v.cvss_score?Number(v.cvss_score).toFixed(1):'')+'</div>'+
       '</div>';
     }
-  } else {
-    vulnsHtml = '<div class="prose">No specific CVEs identified for this application in NIST NVD.</div>';
-  }
+  }else{cveHtml='<div class="prose">No CVEs found in NIST NVD for this application name. Try adding the vendor name for better results.</div>';}
 
-  // KEV alert
-  var kevHtml = '';
-  if (kevEntries.length > 0) {
-    var kevItemsHtml = '';
-    for (var i = 0; i < kevEntries.length; i++) {
-      var k = kevEntries[i];
-      var ransomBadge = (k.ransomware_use && k.ransomware_use.toLowerCase() === 'known') ? '<span class="kev-ransomware">RANSOMWARE</span>' : '';
-      kevItemsHtml += '<div class="kev-item">' +
-        '<span class="kev-cve">' + k.cve_id + '</span>' + ransomBadge +
-        '<br><strong>' + (k.vulnerability_name || '') + '</strong>' +
-        '<br>' + (k.short_description || '') +
-        '<br><em style="font-size:11px;margin-top:4px;display:inline-block">Required Action: ' + (k.required_action || 'See CISA guidance') + '</em>' +
+  // ── CISA KEV alert ──
+  var kevHtml='';
+  if(kevEntries.length>0){
+    var kitems='';
+    for(var i=0;i<kevEntries.length;i++){
+      var k=kevEntries[i];
+      var rb=(k.ransomware_use||'').toLowerCase()==='known'?'<span class="ransomware-badge">RANSOMWARE</span>':'';
+      kitems+='<div class="kev-item">'+
+        '<span class="kev-cve">'+escHtml(k.cve_id)+'</span>'+rb+
+        (k.date_added?' <span style="font-size:10px;opacity:.7">Added '+escHtml(k.date_added)+'</span>':'')+
+        '<br><strong>'+escHtml(k.vulnerability_name||'')+'</strong>'+
+        (k.short_description?'<br>'+escHtml(k.short_description):'')+
+        (k.required_action?'<br><em style="font-size:11px;opacity:.8">Action: '+escHtml(k.required_action)+'</em>':'')+
       '</div>';
     }
-    kevHtml = '<div class="kev-alert">' +
-      '<div class="kev-icon">🚨</div>' +
-      '<div class="kev-content">' +
-        '<div class="kev-title">CISA Known Exploited Vulnerabilities — Active Threats</div>' +
-        '<div class="kev-subtitle">This software has ' + kevEntries.length + ' vulnerabilit' + (kevEntries.length === 1 ? 'y' : 'ies') + ' on CISA\'s Known Exploited Vulnerabilities catalog. These are being actively exploited in the wild.</div>' +
-        '<div class="kev-items">' + kevItemsHtml + '</div>' +
-      '</div>' +
+    kevHtml='<div class="kev-alert">'+
+      '<div class="kev-icon">🚨</div>'+
+      '<div style="flex:1">'+
+        '<div class="kev-title">CISA Known Exploited Vulnerabilities — Active Threat</div>'+
+        '<div class="kev-sub">'+kevEntries.length+' vulnerabilit'+(kevEntries.length===1?'y':'ies')+' in this software appear on CISA\'s KEV catalog — these are being actively exploited by attackers right now.</div>'+
+        '<div class="kev-items">'+kitems+'</div>'+
+      '</div>'+
     '</div>';
   }
 
-  var condHtml = '';
-  var conds = r.conditions || [];
-  for (var i = 0; i < conds.length; i++) { condHtml += '<div class="cond-item"><span class="cond-num">' + (i+1) + '.</span>' + conds[i] + '</div>'; }
+  // ── Malware intelligence ──
+  var malHtml='';
+  var mal=r.malware_intelligence||{};
+  if(mal.known_malware_campaigns)malHtml+='<div class="iblock danger"><div class="iblock-lbl">⚠ Known Malware Campaigns</div><div class="iblock-txt">'+escHtml(mal.known_malware_campaigns)+'</div></div>';
+  if(mal.supply_chain_incidents)malHtml+='<div class="iblock warn"><div class="iblock-lbl">🔗 Supply Chain Incidents</div><div class="iblock-txt">'+escHtml(mal.supply_chain_incidents)+'</div></div>';
+  if(mal.trojanized_distributions)malHtml+='<div class="iblock warn"><div class="iblock-lbl">🦠 Trojanized / Fake Versions</div><div class="iblock-txt">'+escHtml(mal.trojanized_distributions)+'</div></div>';
 
-  var remHtml = '';
-  var rems = r.remediation_actions || [];
-  for (var i = 0; i < rems.length; i++) { remHtml += '<div class="cond-item"><span class="cond-num">→</span>' + rems[i] + '</div>'; }
+  // ── Download guidance ──
+  var dlHtml='';
+  var dl=r.download_recommendations||{};
+  if(dl.official_source)dlHtml+='<div class="iblock success"><div class="iblock-lbl">✓ Official Download Source</div><div class="iblock-txt">'+escHtml(dl.official_source)+'</div></div>';
+  if(dl.verification_method)dlHtml+='<div class="iblock"><div class="iblock-lbl">🔐 Verify Your Download</div><div class="iblock-txt">'+escHtml(dl.verification_method)+'</div></div>';
+  if(dl.avoid_sources)dlHtml+='<div class="iblock danger"><div class="iblock-lbl">✕ Sources to Avoid</div><div class="iblock-txt">'+escHtml(dl.avoid_sources)+'</div></div>';
 
-  var barsHtml = '';
-  var dims = r.risk_dimensions || {};
-  var dimKeys = Object.keys(dims);
-  for (var i = 0; i < dimKeys.length; i++) {
-    var k = dimKeys[i]; var val = dims[k];
-    var label = k.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
-    var col = val>=75?'var(--red)':val>=50?'var(--amber)':val>=25?'#ea580c':'var(--green)';
-    barsHtml += '<div class="rbar-row"><div class="rbar-head"><span>' + label + '</span><span>' + Math.round(val) + '/100</span></div><div class="rbar-track"><div class="rbar-fill" style="width:' + val + '%;background:' + col + '"></div></div></div>';
-  }
+  // ── Risk bars ──
+  var barsHtml='';
+  var dims=r.risk_dimensions||{};
+  Object.keys(dims).forEach(function(k){
+    var val=dims[k];
+    var lbl=k.replace(/_/g,' ').replace(/\b\w/g,function(l){return l.toUpperCase();});
+    var col=val>=75?'var(--red)':val>=50?'var(--amber)':val>=25?'#ea580c':'var(--green)';
+    barsHtml+='<div class="rbar-row"><div class="rbar-head"><span>'+lbl+'</span><span>'+Math.round(val)+'/100</span></div><div class="rbar-track"><div class="rbar-fill" style="width:'+val+'%;background:'+col+'"></div></div></div>';
+  });
+
+  // ── Conditions & remediation ──
+  var condHtml=(r.conditions||[]).map(function(c,i){return '<div class="cond-item"><span class="cond-num">'+(i+1)+'.</span>'+escHtml(c)+'</div>';}).join('');
+  var remHtml=(r.remediation_actions||[]).map(function(c){return '<div class="cond-item"><span class="cond-num">→</span>'+escHtml(c)+'</div>';}).join('');
+
+  // ── Assemble HTML ──
+  var h='<div class="content-inner">';
+
+  // Header
+  h+='<div class="result-header">'+
+    '<div style="flex:1">'+
+      '<div class="app-name">'+escHtml(ctx.app_name||'')+'</div>'+
+      '<div class="app-meta">'+
+        (ctx.app_vendor?'<span>'+escHtml(ctx.app_vendor)+'</span>':'')+
+        (ctx.app_version?'<span>v'+escHtml(ctx.app_version)+'</span>':'')+
+        '<span>'+escHtml((ctx.app_env||'').replace(/_/g,' '))+'</span>'+
+        (ctx.data_class&&ctx.data_class.length?'<span>'+escHtml(ctx.data_class.join(', '))+'</span>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="vbadge '+vc(r.verdict)+'">'+
+      '<div class="vbadge-icon">'+vi(r.verdict)+'</div>'+
+      '<div>'+
+        '<div class="vbadge-lbl">Security Verdict</div>'+
+        '<div class="vbadge-text">'+r.verdict+'</div>'+
+        '<div class="vbadge-reason">'+escHtml(r.verdict_reason||'')+'</div>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+
+  // KEV alert (at top if present)
+  if(kevHtml)h+=kevHtml;
+
+  // Scores
+  h+='<div class="score-row">'+
+    '<div class="scard"><div class="scard-lbl">Risk Score</div><div class="scard-val c-'+scoreC+'">'+Math.round(r.risk_score||0)+'</div><div class="scard-sub">out of 100</div></div>'+
+    '<div class="scard"><div class="scard-lbl">CVSS Estimate</div><div class="scard-val c-'+cvssC+'">'+Number(r.cvss_estimate||0).toFixed(1)+'</div><div class="scard-sub">avg severity</div></div>'+
+    '<div class="scard"><div class="scard-lbl">Live CVEs</div><div class="scard-val c-info">'+(ld.nvd_cve_count||r.cve_count_estimate||0)+'</div><div class="scard-sub">from NVD today</div></div>'+
+    '<div class="scard"><div class="scard-lbl">Exploit Maturity</div><div class="scard-val sm c-'+expC+'">'+escHtml(r.exploit_maturity||'Unknown')+'</div></div>'+
+  '</div>';
+
+  // Executive Summary
+  h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-blue">◈</div><div class="scard-title">Executive Summary</div></div><div class="scard-body"><div class="prose">'+escHtml(r.executive_summary||'')+'</div></div></div>';
+
+  // CVEs (newest first)
+  h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-red">⚠</div><div class="scard-title">Latest Vulnerabilities — Live from NIST NVD (newest first)</div></div><div class="scard-body"><div class="vuln-list">'+cveHtml+'</div></div></div>';
 
   // Malware intelligence
-  var malwareHtml = '';
-  var mal = r.malware_intelligence || {};
-  if (mal.known_malware_campaigns || mal.supply_chain_incidents || mal.trojanized_distributions) {
-    if (mal.known_malware_campaigns) {
-      malwareHtml += '<div class="info-block danger"><div class="info-block-label">⚠ Known Malware Campaigns</div><div class="info-block-content">' + mal.known_malware_campaigns + '</div></div>';
-    }
-    if (mal.supply_chain_incidents) {
-      malwareHtml += '<div class="info-block warn"><div class="info-block-label">🔗 Supply Chain Incidents</div><div class="info-block-content">' + mal.supply_chain_incidents + '</div></div>';
-    }
-    if (mal.trojanized_distributions) {
-      malwareHtml += '<div class="info-block warn"><div class="info-block-label">🦠 Trojanized / Fake Versions</div><div class="info-block-content">' + mal.trojanized_distributions + '</div></div>';
-    }
-  }
+  if(malHtml)h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-red">🦠</div><div class="scard-title">Malware &amp; Threat Distribution Intelligence</div></div><div class="scard-body">'+malHtml+'</div></div>';
 
-  // Download recommendations
-  var downloadHtml = '';
-  var dl = r.download_recommendations || {};
-  if (dl.official_source || dl.verification_method || dl.avoid_sources) {
-    if (dl.official_source) {
-      downloadHtml += '<div class="info-block success"><div class="info-block-label">✓ Official Download Source</div><div class="info-block-content">' + dl.official_source + '</div></div>';
-    }
-    if (dl.verification_method) {
-      downloadHtml += '<div class="info-block"><div class="info-block-label">🔐 Verification Method</div><div class="info-block-content">' + dl.verification_method + '</div></div>';
-    }
-    if (dl.avoid_sources) {
-      downloadHtml += '<div class="info-block danger"><div class="info-block-label">✕ Sources to Avoid</div><div class="info-block-content">' + dl.avoid_sources + '</div></div>';
-    }
-  }
+  // Download guidance
+  if(dlHtml)h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-green">⬇</div><div class="scard-title">Safe Download Guidance</div></div><div class="scard-body">'+dlHtml+'</div></div>';
 
-  var html = '<div class="content-inner">';
-  html += '<div class="result-header"><div class="app-identity"><div class="app-name">' + (ctx.app_name||'') + '</div><div class="app-meta">' + (ctx.app_vendor?'<span>'+ctx.app_vendor+'</span>':'') + (ctx.app_version?'<span>v'+ctx.app_version+'</span>':'') + '<span>' + ((ctx.app_env||'').replace(/_/g,' ')) + '</span>' + (ctx.data_class&&ctx.data_class.length?'<span>'+ctx.data_class.join(', ')+'</span>':'') + '</div></div><div class="verdict-badge ' + vc + '"><div class="verdict-icon">' + verdictIcon(r.verdict) + '</div><div><div class="verdict-label">Security Verdict</div><div class="verdict-text">' + r.verdict + '</div><div class="verdict-reason">' + (r.verdict_reason||'') + '</div></div></div></div>';
+  // Risk Dimensions
+  if(barsHtml)h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-purple">◉</div><div class="scard-title">Risk Dimension Analysis</div></div><div class="scard-body"><div class="risk-bars">'+barsHtml+'</div></div></div>';
 
-  // KEV alert at the top if exists
-  if (kevHtml) html += kevHtml;
+  // Threat Intelligence
+  h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-amber">⬡</div><div class="scard-title">Threat Intelligence</div></div><div class="scard-body"><div class="prose">'+escHtml(r.threat_intelligence||'')+'</div></div></div>';
 
-  html += '<div class="score-row"><div class="score-card"><div class="score-lbl">Risk Score</div><div class="score-val c-' + scoreC + '">' + Math.round(r.risk_score||0) + '</div><div class="score-sub">out of 100</div></div><div class="score-card"><div class="score-lbl">CVSS Estimate</div><div class="score-val c-' + cvssC + '">' + Number(r.cvss_estimate||0).toFixed(1) + '</div><div class="score-sub">avg severity</div></div><div class="score-card"><div class="score-lbl">Live CVEs</div><div class="score-val c-info">' + (liveData.nvd_cve_count || r.cve_count_estimate || 0) + '</div><div class="score-sub">from NVD</div></div><div class="score-card"><div class="score-lbl">Exploit Maturity</div><div class="score-val sm c-' + expC + '">' + (r.exploit_maturity||'Unknown') + '</div></div></div>';
+  // Conditions
+  if(condHtml)h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-amber">◐</div><div class="scard-title">'+(r.verdict==='CONDITIONAL'?'Approval Conditions':'Risk Caveats')+'</div></div><div class="scard-body"><div class="cond-list">'+condHtml+'</div></div></div>';
 
-  html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-blue">◈</div><div class="section-title">Executive Summary</div></div><div class="section-body"><div class="prose">' + (r.executive_summary||'No summary available.') + '</div></div></div>';
+  // Remediation
+  if(remHtml)h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-green">✦</div><div class="scard-title">Remediation &amp; Control Recommendations</div></div><div class="scard-body"><div class="cond-list">'+remHtml+'</div></div></div>';
 
-  html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-red">⚠</div><div class="section-title">Latest Vulnerabilities (Live from NVD + EPSS)</div></div><div class="section-body"><div class="vuln-list">' + vulnsHtml + '</div></div></div>';
+  // Regulatory
+  if(r.regulatory_note)h+='<div class="scard-section"><div class="scard-head"><div class="scard-ico ico-blue">⊞</div><div class="scard-title">Regulatory Implications</div></div><div class="scard-body"><div class="prose">'+escHtml(r.regulatory_note)+'</div></div></div>';
 
-  if (malwareHtml) {
-    html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-red">🦠</div><div class="section-title">Malware &amp; Threat Distribution Intelligence</div></div><div class="section-body">' + malwareHtml + '</div></div>';
-  }
+  // Data freshness
+  if(ld.fetched_at)h+='<div class="data-footer">Data fetched '+new Date(ld.fetched_at).toLocaleString()+' · Sources: NIST NVD, CISA KEV, FIRST EPSS, Claude AI</div>';
 
-  if (downloadHtml) {
-    html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-green">⬇</div><div class="section-title">Safe Download Guidance</div></div><div class="section-body">' + downloadHtml + '</div></div>';
-  }
-
-  if (barsHtml) { html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-purple">◉</div><div class="section-title">Risk Dimension Analysis</div></div><div class="section-body"><div class="risk-bars">' + barsHtml + '</div></div></div>'; }
-
-  html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-amber">⬡</div><div class="section-title">Threat Intelligence</div></div><div class="section-body"><div class="prose">' + (r.threat_intelligence||'No specific threat intelligence available.') + '</div></div></div>';
-
-  if (condHtml) { html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-amber">◐</div><div class="section-title">' + (r.verdict==='CONDITIONAL'?'Approval Conditions':'Risk Caveats') + '</div></div><div class="section-body"><div class="cond-list">' + condHtml + '</div></div></div>'; }
-  if (remHtml) { html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-green">✦</div><div class="section-title">Remediation &amp; Control Recommendations</div></div><div class="section-body"><div class="cond-list">' + remHtml + '</div></div></div>'; }
-  if (r.regulatory_note) { html += '<div class="section-card"><div class="section-head"><div class="section-ico ico-blue">⊞</div><div class="section-title">Regulatory Implications</div></div><div class="section-body"><div class="prose">' + r.regulatory_note + '</div></div></div>'; }
-
-  // Data freshness footer
-  if (r.data_freshness) {
-    html += '<div style="font-size:11px;color:var(--muted);text-align:center;padding:8px 0;font-family:var(--mono)">' + r.data_freshness + '</div>';
-  }
-
-  html += '</div>';
-  document.getElementById('contentPane').innerHTML = html;
-  document.getElementById('contentPane').scrollTop = 0;
+  h+='</div>';
+  document.getElementById('contentPane').innerHTML=h;
+  document.getElementById('contentPane').scrollTop=0;
 }
 </script>
 </body>
